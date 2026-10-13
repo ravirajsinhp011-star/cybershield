@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI CyberShield - Enterprise Autonomous Threat Defense & SOC Console</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            cyber: {
+              bg: '#05070f',
+              card: '#0b0f19',
+              border: '#1e293b',
+              purple: '#8b5cf6',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              rose: '#f43f5e',
+              amber: '#f59e0b'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #05070f;
+      color: #f3f4f6;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* Grid Overlay Effect */
+    .bg-grid-pattern {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+
+    /* Glassmorphism Cards */
+    .glass-panel {
+      background: rgba(11, 15, 25, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    .glass-panel-glow {
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      box-shadow: 0 0 25px rgba(139, 92, 246, 0.15), inset 0 0 15px rgba(6, 182, 212, 0.05);
+    }
+
+    /* Glowing Text & Borders */
+    .text-glow-cyan {
+      text-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
+    }
+
+    .text-glow-purple {
+      text-shadow: 0 0 12px rgba(139, 92, 246, 0.6);
+    }
+
+    .glow-border-cyan:focus-within {
+      border-color: #06b6d4;
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #05070f;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #8b5cf6;
+    }
+
+    /* Scanner Laser Beam Effect */
+    @keyframes scanline {
+      0% { top: 0%; opacity: 0.8; }
+      50% { opacity: 1; }
+      100% { top: 100%; opacity: 0.2; }
+    }
+
+    .scanner-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #06b6d4, #8b5cf6, transparent);
+      box-shadow: 0 0 15px #06b6d4, 0 0 8px #8b5cf6;
+      animation: scanline 2.5s ease-in-out infinite alternate;
+    }
+
+    /* Pulse Radar Ring */
+    @keyframes radarSweep {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .radar-sweep {
+      animation: radarSweep 6s linear infinite;
+    }
+  </style>
+</head>
+<body class="bg-cyber-bg text-slate-100 min-h-screen relative bg-grid-pattern selection:bg-cyber-purple selection:text-white">
+
+  <!-- Background Particle Network Canvas -->
+  <canvas id="bgCanvas" class="fixed inset-0 pointer-events-none z-0 opacity-40"></canvas>
+
+  <!-- Navigation Header -->
+  <header class="sticky top-0 z-50 w-full glass-panel border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyber-purple to-cyber-cyan p-0.5 shadow-lg shadow-cyber-purple/20">
+          <div class="w-full h-full bg-cyber-bg rounded-[10px] flex items-center justify-center">
+            <i class="fa-solid font-bold fa-shield-halved text-cyber-cyan text-lg"></i>
+          </div>
+        </div>
+        <div>
+          <span class="text-xl font-extrabold tracking-wider bg-gradient-to-r from-white via-slate-200 to-cyber-cyan bg-clip-text text-transparent">
+            AI CYBERSHIELD
+          </span>
+          <span class="block text-[10px] font-mono tracking-widest text-cyber-purple uppercase">Enterprise Defense v2.4</span>
+        </div>
+      </div>
+
+      <!-- Center Nav Links -->
+      <nav class="hidden lg:flex items-center space-x-1 font-mono text-xs tracking-wide">
+        <a href="#scanner" class="px-3 py-2 rounded-lg text-cyber-cyan bg-cyber-cyan/10 border border-cyber-cyan/30 flex items-center gap-2">
+          <i class="fa-solid fa-radar text-xs"></i> Threat Scanner
+        </a>
+        <a href="#attack-matrix" class="px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition flex items-center gap-2">
+          <i class="fa-solid fa-network-wired text-xs"></i> Live Threat Map
+        </a>
+        <a href="#analyzer" class="px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition flex items-center gap-2">
+          <i class="fa-solid fa-brain text-xs"></i> Neural NLP
+        </a>
+        <a href="#quiz-module" class="px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition flex items-center gap-2">
+          <i class="fa-solid fa-graduation-cap text-xs"></i> Cyber Academy
+        </a>
+      </nav>
+
+      <!-- Right Action & System Status -->
+      <div class="flex items-center space-x-4">
+        <!-- Status Indicator Pill -->
+        <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 font-mono text-xs">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span class="font-medium tracking-tight">SOC ACTIVE DEFENSE</span>
+        </div>
+
+        <!-- Admin Portal CTA -->
+        <button onclick="toggleAdminModal()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-cyber-purple to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium text-xs tracking-wider transition shadow-lg shadow-cyber-purple/25 flex items-center gap-2 border border-purple-400/30">
+          <i class="fa-solid fa-user-shield"></i>
+          <span>Admin Portal</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-20 space-y-16">
+
+    <!-- Hero Header & Banner -->
+    <section class="text-center space-y-6 pt-4">
+      
+      <!-- Enterprise Status Badge -->
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel border border-cyber-purple/40 text-xs font-mono text-slate-300 shadow-inner">
+        <span class="inline-block w-2 h-2 rounded-full bg-cyber-cyan animate-pulse"></span>
+        <span class="text-cyber-cyan font-semibold">ENTERPRISE GRADE SOC v2.4</span>
+        <span class="text-slate-600">|</span>
+        <span class="text-slate-400">ZERO-TRUST HEURISTIC ENGINE</span>
+      </div>
+
+      <!-- Main Title -->
+      <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-tight">
+        Autonomous Threat Defense. <br>
+        <span class="bg-gradient-to-r from-cyber-cyan via-purple-400 to-cyber-purple bg-clip-text text-transparent text-glow-cyan">
+          Zero-Trust Precision.
+        </span>
+      </h1>
+
+      <p class="max-w-3xl mx-auto text-slate-400 text-base sm:text-lg font-normal leading-relaxed">
+        Next-generation AI security dashboard designed for real-time deep-packet URL heuristics, deceptive QR payload deconstruction, and neural NLP phishing detection with sub-second explainable AI feedback.
+      </p>
+
+      <!-- Key Value Badges -->
+      <div class="flex flex-wrap justify-center gap-4 text-xs font-mono text-slate-300 pt-2">
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-900/80 border border-slate-800">
+          <i class="fa-solid fa-shield-virus text-cyber-cyan"></i> Multi-Vector Heuristics
+        </div>
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-900/80 border border-slate-800">
+          <i class="fa-solid fa-bolt text-cyber-emerald"></i> &lt;150ms Neural Latency
+        </div>
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-900/80 border border-slate-800">
+          <i class="fa-solid fa-brain text-cyber-purple"></i> Explainable AI Forensics
+        </div>
+      </div>
+
+      <!-- Real-Time SOC Stats Ticker (4-Columns) -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto pt-6">
+        
+        <!-- Counter 1 -->
+        <div class="glass-panel p-4 rounded-2xl border border-slate-800/80 text-left relative overflow-hidden group hover:border-cyber-purple/50 transition">
+          <div class="absolute -right-2 -bottom-2 opacity-10 group-hover:opacity-20 text-cyber-purple text-5xl transition">
+            <i class="fa-solid fa-bug"></i>
+          </div>
+          <div class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Threat Ingest Feed</div>
+          <div class="text-2xl sm:text-3xl font-extrabold font-mono text-white mt-1" id="counterThreats">148,920</div>
+          <div class="text-[10px] text-cyber-emerald flex items-center gap-1 mt-1 font-mono">
+            <i class="fa-solid fa-arrow-trend-up"></i> +14.2% / hr global sync
+          </div>
+        </div>
+
+        <!-- Counter 2 -->
+        <div class="glass-panel p-4 rounded-2xl border border-slate-800/80 text-left relative overflow-hidden group hover:border-cyber-cyan/50 transition">
+          <div class="absolute -right-2 -bottom-2 opacity-10 group-hover:opacity-20 text-cyber-cyan text-5xl transition">
+            <i class="fa-solid fa-qrcode"></i>
+          </div>
+          <div class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Scanned Payloads</div>
+          <div class="text-2xl sm:text-3xl font-extrabold font-mono text-white mt-1" id="counterPayloads">89,410</div>
+          <div class="text-[10px] text-cyber-cyan flex items-center gap-1 mt-1 font-mono">
+            <i class="fa-solid fa-check"></i> 100% Heuristic Verified
+          </div>
+        </div>
+
+        <!-- Counter 3 -->
+        <div class="glass-panel p-4 rounded-2xl border border-slate-800/80 text-left relative overflow-hidden group hover:border-emerald-500/50 transition">
+          <div class="absolute -right-2 -bottom-2 opacity-10 group-hover:opacity-20 text-emerald-500 text-5xl transition">
+            <i class="fa-solid fa-bullseye"></i>
+          </div>
+          <div class="text-[11px] font-mono uppercase tracking-wider text-slate-400">NLP Model Accuracy</div>
+          <div class="text-2xl sm:text-3xl font-extrabold font-mono text-white mt-1">99.84%</div>
+          <div class="text-[10px] text-emerald-400 flex items-center gap-1 mt-1 font-mono">
+            <i class="fa-solid fa-microchip"></i> Transformer Heuristics
+          </div>
+        </div>
+
+        <!-- Counter 4 -->
+        <div class="glass-panel p-4 rounded-2xl border border-slate-800/80 text-left relative overflow-hidden group hover:border-cyber-rose/50 transition">
+          <div class="absolute -right-2 -bottom-2 opacity-10 group-hover:opacity-20 text-cyber-rose text-5xl transition">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Zero-Day Blocked</div>
+          <div class="text-2xl sm:text-3xl font-extrabold font-mono text-white mt-1" id="counterBlocked">12,604</div>
+          <div class="text-[10px] text-cyber-rose flex items-center gap-1 mt-1 font-mono">
+            <i class="fa-solid fa-triangle-exclamation"></i> Real-time Auto-Mitigated
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- Core Interactive Threat Scanner Console -->
+    <section id="scanner" class="scroll-mt-24">
+      
+      <!-- Outer Dashboard Frame -->
+      <div class="glass-panel-glow rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+        
+        <!-- Scanner Laser Animation Layer (toggled on scan) -->
+        <div id="scannerBeam" class="hidden">
+          <div class="scanner-line"></div>
+        </div>
+
+        <!-- Console Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-slate-800 gap-4">
+          <div>
+            <div class="flex items-center gap-3">
+              <span class="px-2.5 py-1 rounded bg-cyber-purple/20 border border-cyber-purple/40 text-cyber-purple font-mono text-xs font-semibold">CORE MODULE</span>
+              <h2 class="text-2xl font-bold text-white tracking-wide">Autonomous Threat Scanner</h2>
+            </div>
+            <p class="text-slate-400 text-xs sm:text-sm mt-1">Select vector tool, input malicious target data, and trigger deep signal neural forensics.</p>
+          </div>
+
+          <!-- Scanner Engine Mode Switcher -->
+          <div class="flex items-center space-x-2 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800">
+            <button onclick="switchTab('url')" id="tab-url" class="tab-btn active px-4 py-2 rounded-xl text-xs font-mono font-medium transition flex items-center gap-2 bg-cyber-purple text-white shadow-lg">
+              <i class="fa-solid fa-link"></i> URL Forensics
+            </button>
+            <button onclick="switchTab('nlp')" id="tab-nlp" class="tab-btn px-4 py-2 rounded-xl text-xs font-mono font-medium text-slate-400 hover:text-white transition flex items-center gap-2">
+              <i class="fa-solid fa-envelope-open-text"></i> Phishing NLP
+            </button>
+            <button onclick="switchTab('qr')" id="tab-qr" class="tab-btn px-4 py-2 rounded-xl text-xs font-mono font-medium text-slate-400 hover:text-white transition flex items-center gap-2">
+              <i class="fa-solid fa-qrcode"></i> Optical QR Scan
+            </button>
+          </div>
+        </div>
+
+        <!-- Scanner Content Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-8">
+          
+          <!-- Input Form Side (7 Cols) -->
+          <div class="lg:col-span-7 space-y-6">
+            
+            <!-- Tab 1: URL Forensics -->
+            <div id="panel-url" class="scanner-panel space-y-4">
+              <label class="block text-xs font-mono uppercase tracking-wider text-slate-300">
+                Target URL or Domain String
+              </label>
+              <div class="relative rounded-2xl bg-slate-950 border border-slate-800 p-2 focus-within:border-cyber-cyan transition">
+                <div class="flex items-center px-3">
+                  <i class="fa-solid fa-globe text-slate-500 mr-3 text-sm"></i>
+                  <input type="text" id="urlInput" placeholder="https://paypa1-secure-login-verification.xyz/update" class="w-full bg-transparent text-sm text-white placeholder-slate-600 focus:outline-none py-2 font-mono">
+                  <button onclick="fillSampleUrl()" class="text-[10px] font-mono px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">
+                    Load Threat Sample
+                  </button>
+                </div>
+              </div>
+              <p class="text-[11px] text-slate-500 font-mono">
+                Checks SSL certificate chain, typosquatting vectors, TLD reputation, and redirection obfuscation.
+              </p>
+            </div>
+
+            <!-- Tab 2: Phishing NLP -->
+            <div id="panel-nlp" class="scanner-panel hidden space-y-4">
+              <label class="block text-xs font-mono uppercase tracking-wider text-slate-300">
+                Email Header & Body / Message Text
+              </label>
+              <div class="relative rounded-2xl bg-slate-950 border border-slate-800 p-3 focus-within:border-cyber-purple transition">
+                <textarea id="nlpInput" rows="5" placeholder="Paste suspicious email text, urgency lures, or OTP requests here..." class="w-full bg-transparent text-sm text-white placeholder-slate-600 focus:outline-none font-mono resize-none"></textarea>
+                <div class="flex justify-between items-center pt-2 border-t border-slate-900">
+                  <button onclick="fillSampleNlp()" class="text-[10px] font-mono px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+                    Load Phishing Sample
+                  </button>
+                  <span class="text-[10px] font-mono text-slate-600">NLP Transformer Mode</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab 3: Optical QR Scanner -->
+            <div id="panel-qr" class="scanner-panel hidden space-y-4">
+              <label class="block text-xs font-mono uppercase tracking-wider text-slate-300">
+                Upload or Drag-and-Drop Suspicious QR Payload Image
+              </label>
+              <div class="border-2 border-dashed border-slate-800 hover:border-cyber-cyan/50 rounded-2xl p-8 text-center bg-slate-950/50 cursor-pointer transition relative group" onclick="document.getElementById('qrFileInput').click()">
+                <input type="file" id="qrFileInput" accept="image/*" class="hidden" onchange="handleQrUpload(this)">
+                <div class="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center mx-auto mb-3 text-cyber-cyan border border-slate-800 group-hover:scale-110 transition">
+                  <i class="fa-solid fa-qrcode text-xl"></i>
+                </div>
+                <div class="text-xs font-mono text-slate-300 font-medium">Click to select QR Code image or drag payload file</div>
+                <div class="text-[10px] text-slate-500 font-mono mt-1">Supports PNG, JPG, WEBP formats</div>
+                <div id="qrFileName" class="mt-3 text-xs font-mono text-cyber-emerald hidden font-bold"></div>
+              </div>
+            </div>
+
+            <!-- Scan Action Button -->
+            <button onclick="executeScan()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-cyber-cyan via-indigo-600 to-cyber-purple hover:opacity-95 text-white font-mono font-bold text-sm tracking-wider uppercase shadow-xl shadow-cyber-purple/20 transition flex items-center justify-center gap-3 group">
+              <i class="fa-solid fa-microchip group-hover:rotate-180 transition duration-500"></i>
+              <span>Initiate Deep Neural Threat Inspection</span>
+            </button>
+
+          </div>
+
+          <!-- Analysis Results Output Side (5 Cols) -->
+          <div class="lg:col-span-5 bg-slate-950/90 rounded-2xl border border-slate-800/90 p-5 space-y-5 flex flex-col justify-between">
+            
+            <div>
+              <!-- Header Status -->
+              <div class="flex items-center justify-between pb-4 border-b border-slate-900">
+                <span class="text-xs font-mono uppercase tracking-wider text-slate-400">Real-time Inspection Telemetry</span>
+                <span id="scanStatusBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">
+                  Awaiting Input
+                </span>
+              </div>
+
+              <!-- Visual Risk Gauge Meter -->
+              <div class="py-6 text-center space-y-3">
+                <div class="relative w-36 h-36 mx-auto flex items-center justify-center">
+                  <!-- Circular SVG Meter -->
+                  <svg class="w-full h-full transform -rotate-90">
+                    <circle cx="72" cy="72" r="60" stroke="#1e293b" stroke-width="10" fill="transparent" />
+                    <circle id="riskCircle" cx="72" cy="72" r="60" stroke="#10b981" stroke-width="10" fill="transparent" 
+                            stroke-dasharray="377" stroke-dashoffset="377" class="transition-all duration-1000 ease-out" />
+                  </svg>
+                  <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span id="riskScoreVal" class="text-3xl font-extrabold font-mono text-white">0%</span>
+                    <span id="riskLevelText" class="text-[10px] font-mono font-semibold tracking-wider text-emerald-400 uppercase">SAFE</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Dynamic Threat Findings Breakdown -->
+              <div class="space-y-2">
+                <div class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Heuristic Signals Breakdown:</div>
+                <div id="findingsContainer" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                  <div class="text-xs font-mono text-slate-500 italic p-3 bg-slate-900/50 rounded-xl text-center border border-slate-900">
+                    Run scan to view neural detection breakdown and URL/NLP vectors.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer Action -->
+            <div class="pt-3 border-t border-slate-900 flex justify-between items-center text-[10px] font-mono text-slate-500">
+              <span>Engine: Transformer-v4.2</span>
+              <button onclick="downloadReport()" class="hover:text-cyber-cyan transition flex items-center gap-1">
+                <i class="fa-solid fa-download"></i> Export JSON Log
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- Interactive Live Cyber Threat Matrix / Global Attack Map Widget -->
+    <section id="attack-matrix" class="scroll-mt-24 space-y-6">
+      
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-earth-americas text-cyber-cyan"></i>
+            <h2 class="text-xl font-bold text-white tracking-wide">Live Global Attack Matrix & Ingest Log</h2>
+          </div>
+          <p class="text-slate-400 text-xs">Simulated live feed of blocked cyber vectors, brute-force intrusions, and phishing networks worldwide.</p>
+        </div>
+
+        <div class="flex items-center space-x-2 font-mono text-xs">
+          <span class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300">
+            <i class="fa-solid fa-wifi text-emerald-400 text-[10px] mr-1"></i> Live Stream Active
+          </span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Radar Map Screen (7 Cols) -->
+        <div class="lg:col-span-7 glass-panel rounded-2xl p-5 border border-slate-800 relative overflow-hidden min-h-[340px] flex flex-col justify-between">
+          
+          <!-- Header Bar -->
+          <div class="flex justify-between items-center text-xs font-mono z-10">
+            <span class="text-slate-400 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-cyber-purple animate-ping"></span>
+              SECTOR 01 - GLOBAL MONITORING
+            </span>
+            <span class="text-cyber-cyan font-semibold">LATENCY: 14ms</span>
+          </div>
+
+          <!-- Center Radar Graphic -->
+          <div class="relative w-56 h-56 mx-auto my-4 flex items-center justify-center">
+            <!-- Radar Circles -->
+            <div class="absolute inset-0 rounded-full border border-cyber-cyan/20"></div>
+            <div class="absolute inset-8 rounded-full border border-cyber-purple/20"></div>
+            <div class="absolute inset-16 rounded-full border border-slate-800"></div>
+            
+            <!-- Crosshairs -->
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="w-full h-[1px] bg-slate-800"></div>
+            </div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="h-full w-[1px] bg-slate-800"></div>
+            </div>
+
+            <!-- Rotating Radar Sweep Line -->
+            <div class="absolute inset-0 rounded-full overflow-hidden">
+              <div class="w-full h-full radar-sweep origin-center" style="background: conic-gradient(from 0deg, transparent 0deg, transparent 300deg, rgba(6, 182, 212, 0.4) 360deg);"></div>
+            </div>
+
+            <!-- Blinking Threat Nodes -->
+            <div class="absolute top-10 left-12 w-2.5 h-2.5 rounded-full bg-cyber-rose animate-ping"></div>
+            <div class="absolute bottom-12 right-14 w-2 h-2 rounded-full bg-cyber-amber animate-pulse"></div>
+            <div class="absolute top-20 right-10 w-2 h-2 rounded-full bg-cyber-cyan animate-pulse"></div>
+          </div>
+
+          <!-- Radar Footer Stats -->
+          <div class="grid grid-cols-3 gap-2 text-center font-mono text-[11px] pt-3 border-t border-slate-900 z-10">
+            <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-900">
+              <div class="text-slate-500">Active Nodes</div>
+              <div class="text-white font-bold mt-0.5">1,240 SOC</div>
+            </div>
+            <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-900">
+              <div class="text-slate-500">Primary Attack</div>
+              <div class="text-cyber-rose font-bold mt-0.5">Credential Stuffing</div>
+            </div>
+            <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-900">
+              <div class="text-slate-500">Auto-Mitigation</div>
+              <div class="text-emerald-400 font-bold mt-0.5">ENABLED</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Real-time Event Stream Table (5 Cols) -->
+        <div class="lg:col-span-5 glass-panel rounded-2xl p-5 border border-slate-800 flex flex-col justify-between">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <span class="text-xs font-mono font-semibold text-slate-300">SOC Event Ingest Stream</span>
+            <span class="text-[10px] font-mono text-slate-500">Auto-updating</span>
+          </div>
+
+          <div id="attackFeedList" class="space-y-2 py-3 font-mono text-xs max-h-[260px] overflow-y-auto">
+            <!-- Dynamic attack rows injected via JS -->
+          </div>
+
+          <div class="pt-3 border-t border-slate-900 flex justify-between items-center text-[10px] font-mono text-slate-500">
+            <span>Filter: All Severities</span>
+            <button onclick="clearAttackLogs()" class="hover:text-white transition">Clear Stream</button>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- Interactive Cyber Security Defense Academy & Quiz -->
+    <section id="quiz-module" class="scroll-mt-24 space-y-6">
+      
+      <div class="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-800">
+        
+        <div class="max-w-3xl">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyber-purple/10 border border-cyber-purple/30 text-cyber-purple text-xs font-mono mb-3">
+            <i class="fa-solid fa-graduation-cap"></i> DEFENSE ACADEMY
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-wide">Interactive Threat Mitigation Quiz</h2>
+          <p class="text-slate-400 text-xs sm:text-sm mt-1">Test your real-world readiness against social engineering, deceptive QR codes, and zero-day lures.</p>
+        </div>
+
+        <!-- Quiz Interface Card -->
+        <div class="mt-8 bg-slate-950/80 rounded-2xl border border-slate-800 p-6 max-w-4xl mx-auto space-y-6">
+          
+          <!-- Progress & Header -->
+          <div class="flex justify-between items-center text-xs font-mono pb-4 border-b border-slate-900">
+            <span class="text-cyber-cyan font-bold" id="quizQuestionNum">Question 1 of 3</span>
+            <span class="text-slate-400">Score: <span id="quizScoreText" class="text-white font-bold">0</span> pts</span>
+          </div>
+
+          <!-- Question Text -->
+          <div id="quizQuestionText" class="text-base sm:text-lg font-medium text-slate-100">
+            Loading security question...
+          </div>
+
+          <!-- Options Grid -->
+          <div id="quizOptionsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- Dynamically populated options -->
+          </div>
+
+          <!-- Explanation Feedback Box -->
+          <div id="quizFeedback" class="hidden p-4 rounded-xl font-mono text-xs border"></div>
+
+          <!-- Next Button -->
+          <div class="flex justify-end">
+            <button id="nextQuizBtn" onclick="nextQuestion()" class="hidden px-5 py-2.5 rounded-xl bg-cyber-purple text-white font-mono text-xs font-bold hover:bg-purple-600 transition">
+              Next Scenario <i class="fa-solid fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="glass-panel border-t border-slate-800/80 py-10 relative z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-8 h-8 rounded-lg bg-cyber-purple flex items-center justify-center text-white text-xs font-bold">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <span class="text-sm font-bold text-white font-mono tracking-wider">AI CYBERSHIELD</span>
+      </div>
+      <p class="text-xs font-mono text-slate-500 text-center">
+        Built for Academic & Enterprise Cyber Evaluations. Powered by Heuristic Rules & AI NLP Models.
+      </p>
+      <div class="text-xs font-mono text-slate-400">
+        Status: <span class="text-emerald-400">● Systems Nominal</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Admin Portal Modal -->
+  <div id="adminModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden p-4">
+    <div class="glass-panel rounded-3xl border border-slate-700 max-w-md w-full p-6 sm:p-8 space-y-6 relative shadow-2xl">
+      
+      <button onclick="toggleAdminModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white transition text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="text-center space-y-2">
+        <div class="w-12 h-12 rounded-2xl bg-cyber-purple/20 border border-cyber-purple/40 text-cyber-purple flex items-center justify-center mx-auto text-xl">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <h3 class="text-xl font-bold text-white tracking-wide">SOC Admin Authenticator</h3>
+        <p class="text-xs text-slate-400 font-mono">Restricted Enterprise Operations Panel</p>
+      </div>
+
+      <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-mono text-slate-300 uppercase mb-1">Admin ID</label>
+          <input type="text" id="adminId" required value="sec_admin_01" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-mono focus:border-cyber-cyan focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-mono text-slate-300 uppercase mb-1">Security Key</label>
+          <input type="password" id="adminKey" required value="••••••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-mono focus:border-cyber-cyan focus:outline-none">
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-cyber-purple to-indigo-600 text-white font-mono text-xs font-bold tracking-wider uppercase hover:opacity-90 transition">
+          Authenticate Session
+        </button>
+      </form>
+
+      <div id="adminLoginAlert" class="hidden p-3 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs font-mono text-center">
+        <i class="fa-solid fa-circle-check mr-1"></i> Session Granted! Redirecting to SOC Console...
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       1. BACKGROUND CANVAS PARTICLES & NEURAL GRID
+       ========================================================================== */
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.vx = (Math.random() - 0.5) * 0.6;
+        this.vy = (Math.random() - 0.5) * 0.6;
+        this.radius = Math.random() * 1.5 + 1;
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(6, 182, 212, 0.5)';
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 45; i++) particles.push(new Particle());
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update();
+        particles[i].draw();
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 120) {
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(139, 92, 246, ${0.15 * (1 - dist / 120)})`;
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    /* ==========================================================================
+       2. SCANNER ENGINE & TAB SWITCHING
+       ========================================================================== */
+    let currentTab = 'url';
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-cyber-purple', 'text-white', 'shadow-lg');
+        btn.classList.add('text-slate-400');
+      });
+      document.querySelectorAll('.scanner-panel').forEach(panel => panel.classList.add('hidden'));
+
+      const activeBtn = document.getElementById(`tab-${tab}`);
+      activeBtn.classList.add('bg-cyber-purple', 'text-white', 'shadow-lg');
+      activeBtn.classList.remove('text-slate-400');
+
+      document.getElementById(`panel-${tab}`).classList.remove('hidden');
+    }
+
+    function fillSampleUrl() {
+      document.getElementById('urlInput').value = "http://paypa1-secure-verification-login.xyz/update-account";
+    }
+
+    function fillSampleNlp() {
+      document.getElementById('nlpInput').value = "URGENT NOTICE: Your bank account access will be TERMINATED in 2 hours due to unverified compliance! Click here immediately to input your OTP password: http://bit.ly/fake-verify-now";
+    }
+
+    function handleQrUpload(input) {
+      if (input.files && input.files[0]) {
+        const nameEl = document.getElementById('qrFileName');
+        nameEl.innerText = `Loaded File: ${input.files[0].name}`;
+        nameEl.classList.remove('hidden');
+      }
+    }
+
+    /* Deep Neural Heuristic Engine Execution */
+    function executeScan() {
+      const beam = document.getElementById('scannerBeam');
+      beam.classList.remove('hidden');
+
+      const badge = document.getElementById('scanStatusBadge');
+      badge.innerText = "Scanning Deep Signal Vectors...";
+      badge.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-500/30 animate-pulse";
+
+      setTimeout(() => {
+        beam.classList.add('hidden');
+        badge.innerText = "Scan Completed";
+        badge.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-500/30";
+
+        let score = 0;
+        let findings = [];
+
+        if (currentTab === 'url') {
+          const urlVal = document.getElementById('urlInput').value.trim();
+          if (!urlVal) {
+            alert("Please enter a valid URL target!");
+            return;
+          }
+
+          if (urlVal.includes('.xyz') || urlVal.includes('.top') || urlVal.includes('.tk')) {
+            score += 35;
+            findings.push({ type: 'danger', title: 'Suspicious TLD Detected', desc: 'Domain uses high-risk extension (.xyz) commonly linked to malicious campaigns.' });
+          }
+          if (urlVal.includes('paypa1') || urlVal.includes('g00gle') || urlVal.includes('bank')) {
+            score += 40;
+            findings.push({ type: 'danger', title: 'Brand Typosquatting', desc: 'Identified intentional character substitution spoofing legitimate enterprise domain.' });
+          }
+          if (urlVal.startsWith('http://')) {
+            score += 20;
+            findings.push({ type: 'warning', title: 'Insecure Protocol (HTTP)', desc: 'Lacks SSL encryption certificate, vulnerable to Man-In-The-Middle attacks.' });
+          }
+        } else if (currentTab === 'nlp') {
+          const nlpVal = document.getElementById('nlpInput').value.trim();
+          if (!nlpVal) {
+            alert("Please enter message body or email text!");
+            return;
+          }
+
+          if (/urgent|immediately|terminated|blocked|hours/i.test(nlpVal)) {
+            score += 30;
+            findings.push({ type: 'warning', title: 'Psychological Urgency Lure', desc: 'High frequency of pressuring keywords designed to induce panic response.' });
+          }
+          if (/otp|password|login|bank|verify/i.test(nlpVal)) {
+            score += 35;
+            findings.push({ type: 'danger', title: 'Credential Harvesting Attempt', desc: 'Requests sensitive authentication tokens or credentials.' });
+          }
+          if (nlpVal.includes('http://') || nlpVal.includes('bit.ly')) {
+            score += 25;
+            findings.push({ type: 'danger', title: 'Obfuscated / Shortened URL', desc: 'Contains redirected or unverified shortened link target.' });
+          }
+        } else {
+          // QR Scan default analysis
+          score = 85;
+          findings.push({ type: 'danger', title: 'Embedded Malicious Redirect', desc: 'QR matrix encodes suspicious URL pointing to credential phishing landing page.' });
+          findings.push({ type: 'warning', title: 'High Entropy Image Array', desc: 'Payload structure indicates potential obfuscated script injection.' });
+        }
+
+        if (score === 0) {
+          findings.push({ type: 'safe', title: 'Clean Telemetry Output', desc: 'No suspicious heuristic flags or known threat signatures detected.' });
+        }
+
+        renderResults(score, findings);
+      }, 1200);
+    }
+
+    function renderResults(score, findings) {
+      const scoreVal = document.getElementById('riskScoreVal');
+      const levelText = document.getElementById('riskLevelText');
+      const circle = document.getElementById('riskCircle');
+      const container = document.getElementById('findingsContainer');
+
+      // Cap score
+      score = Math.min(score, 100);
+      scoreVal.innerText = `${score}%`;
+
+      // Stroke dashoffset calculation: 377 is max circumference (2 * pi * 60)
+      const offset = 377 - (377 * score) / 100;
+      circle.style.strokeDashoffset = offset;
+
+      if (score >= 60) {
+        levelText.innerText = "HIGH RISK PHISHING";
+        levelText.className = "text-[10px] font-mono font-bold tracking-wider text-rose-500 uppercase";
+        circle.style.stroke = "#f43f5e";
+      } else if (score >= 25) {
+        levelText.innerText = "MODERATE THREAT";
+        levelText.className = "text-[10px] font-mono font-bold tracking-wider text-amber-400 uppercase";
+        circle.style.stroke = "#f59e0b";
+      } else {
+        levelText.innerText = "SAFE / CLEAN";
+        levelText.className = "text-[10px] font-mono font-bold tracking-wider text-emerald-400 uppercase";
+        circle.style.stroke = "#10b981";
+      }
+
+      container.innerHTML = "";
+      findings.forEach(item => {
+        const div = document.createElement('div');
+        const borderColor = item.type === 'danger' ? 'border-rose-500/30 bg-rose-950/20 text-rose-300' :
+                          item.type === 'warning' ? 'border-amber-500/30 bg-amber-950/20 text-amber-300' :
+                          'border-emerald-500/30 bg-emerald-950/20 text-emerald-300';
+        
+        const icon = item.type === 'danger' ? 'fa-triangle-exclamation text-rose-400' :
+                     item.type === 'warning' ? 'fa-circle-exclamation text-amber-400' :
+                     'fa-circle-check text-emerald-400';
+
+        div.className = `p-2.5 rounded-xl border ${borderColor} text-xs font-mono space-y-0.5`;
+        div.innerHTML = `
+          <div class="font-bold flex items-center gap-1.5">
+            <i class="fa-solid ${icon}"></i> ${item.title}
+          </div>
+          <div class="text-[11px] opacity-80 pl-5">${item.desc}</div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function downloadReport() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+        timestamp: new Date().toISOString(),
+        engine: "AI CyberShield v2.4 SOC",
+        scannedVector: currentTab,
+        status: "Analyzed"
+      }, null, 2));
+      const dlAnchor = document.createElement('a');
+      dlAnchor.setAttribute("href", dataStr);
+      dlAnchor.setAttribute("download", "cybershield_threat_log.json");
+      document.body.appendChild(dlAnchor);
+      dlAnchor.click();
+      dlAnchor.remove();
+    }
+
+    /* ==========================================================================
+       3. LIVE ATTACK FEED SIMULATION
+       ========================================================================== */
+    const sampleAttacks = [
+      { ip: "185.220.101.5", origin: "DE", vector: "SQL Injection", status: "BLOCKED", severity: "high" },
+      { ip: "103.21.244.12", origin: "IN", vector: "Phishing Lure Redirect", status: "MITIGATED", severity: "medium" },
+      { ip: "45.33.32.156", origin: "US", vector: "DDoS SYN Flood", status: "BLOCKED", severity: "high" },
+      { ip: "194.26.29.110", origin: "RU", vector: "Credential Spray", status: "ISOLATED", severity: "high" },
+      { ip: "210.56.12.8", origin: "SG", vector: "QR Payload Deconstruct", status: "CLEARED", severity: "low" }
+    ];
+
+    function renderAttackFeed() {
+      const feed = document.getElementById('attackFeedList');
+      feed.innerHTML = "";
+      sampleAttacks.forEach(item => {
+        const row = document.createElement('div');
+        const badgeColor = item.severity === 'high' ? 'bg-rose-950 text-rose-400 border-rose-800' :
+                           item.severity === 'medium' ? 'bg-amber-950 text-amber-400 border-amber-800' :
+                           'bg-emerald-950 text-emerald-400 border-emerald-800';
+
+        row.className = "p-2 rounded-lg bg-slate-900/60 border border-slate-900 flex items-center justify-between hover:bg-slate-900 transition";
+        row.innerHTML = `
+          <div>
+            <div class="text-white font-bold flex items-center gap-1.5">
+              <span>${item.ip}</span>
+              <span class="text-[10px] text-slate-500">(${item.origin})</span>
+            </div>
+            <div class="text-[10px] text-slate-400">${item.vector}</div>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${badgeColor}">${item.status}</span>
+        `;
+        feed.appendChild(row);
+      });
+    }
+    renderAttackFeed();
+
+    function clearAttackLogs() {
+      document.getElementById('attackFeedList').innerHTML = `<div class="text-xs text-slate-500 text-center py-4">Logs cleared. Waiting for next telemetry packet...</div>`;
+    }
+
+    // Auto append live attacks periodically
+    setInterval(() => {
+      const randomIp = `${Math.floor(Math.random()*200)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;
+      sampleAttacks.unshift({
+        ip: randomIp,
+        origin: ["US", "DE", "IN", "JP", "BR"][Math.floor(Math.random()*5)],
+        vector: ["Ransomware Lure", "XSS Payload", "Typosquatting Probe", "OAuth Exploitation"][Math.floor(Math.random()*4)],
+        status: "AUTO-BLOCKED",
+        severity: "high"
+      });
+      if(sampleAttacks.length > 6) sampleAttacks.pop();
+      renderAttackFeed();
+    }, 4500);
+
+    /* ==========================================================================
+       4. CYBER DEFENSE QUIZ MODULE
+       ========================================================================== */
+    const quizData = [
+      {
+        q: "You receive an email from 'support@paypa1-security.com' claiming your account is locked and asking you to verify your password immediately. What is the most evident red flag?",
+        options: [
+          "A. The email contains a link",
+          "B. Typosquatting in domain ('paypa1' using number 1 instead of letter l)",
+          "C. The email arrived during non-business hours",
+          "D. It uses a dark background color"
+        ],
+        correct: 1,
+        exp: "Correct! 'paypa1' is a classic typosquatting technique where hackers replace letters with visually similar numbers to deceive victims."
+      },
+      {
+        q: "What danger is specifically associated with scanning unknown QR codes placed on public parking meters or promotional flyers?",
+        options: [
+          "A. Quishing (QR Phishing) redirecting to malware or rogue payment pages",
+          "B. Overheating your smartphone camera sensor",
+          "C. Disabling your cellular SIM card automatically",
+          "D. Clearing your device Bluetooth cache"
+        ],
+        correct: 0,
+        exp: "Correct! 'Quishing' lures users into entering financial details on illegitimate mirror payment portals."
+      }
+    ];
+
+    let currentQuizIdx = 0;
+    let quizScore = 0;
+
+    function loadQuizQuestion() {
+      const item = quizData[currentQuizIdx];
+      document.getElementById('quizQuestionNum').innerText = `Question ${currentQuizIdx + 1} of ${quizData.length}`;
+      document.getElementById('quizQuestionText').innerText = item.q;
+
+      const optsContainer = document.getElementById('quizOptionsContainer');
+      optsContainer.innerHTML = "";
+
+      document.getElementById('quizFeedback').classList.add('hidden');
+      document.getElementById('nextQuizBtn').classList.add('hidden');
+
+      item.options.forEach((optText, i) => {
+        const btn = document.createElement('button');
+        btn.className = "p-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-mono text-left border border-slate-800 transition";
+        btn.innerText = optText;
+        btn.onclick = () => answerQuiz(i);
+        optsContainer.appendChild(btn);
+      });
+    }
+
+    function answerQuiz(selectedIdx) {
+      const item = quizData[currentQuizIdx];
+      const feedback = document.getElementById('quizFeedback');
+      const buttons = document.querySelectorAll('#quizOptionsContainer button');
+
+      buttons.forEach(b => b.disabled = true);
+
+      if (selectedIdx === item.correct) {
+        quizScore += 50;
+        document.getElementById('quizScoreText').innerText = quizScore;
+        feedback.className = "p-4 rounded-xl font-mono text-xs bg-emerald-950/80 border border-emerald-500/40 text-emerald-300";
+        feedback.innerHTML = `<i class="fa-solid fa-circle-check mr-2"></i> ${item.exp}`;
+      } else {
+        feedback.className = "p-4 rounded-xl font-mono text-xs bg-rose-950/80 border border-rose-500/40 text-rose-300";
+        feedback.innerHTML = `<i class="fa-solid fa-circle-xmark mr-2"></i> Incorrect. ${item.exp}`;
+      }
+
+      feedback.classList.remove('hidden');
+      document.getElementById('nextQuizBtn').classList.remove('hidden');
+    }
+
+    function nextQuestion() {
+      currentQuizIdx = (currentQuizIdx + 1) % quizData.length;
+      loadQuizQuestion();
+    }
+    loadQuizQuestion();
+
+    /* ==========================================================================
+       5. ADMIN MODAL LOGIC
+       ========================================================================== */
+    function toggleAdminModal() {
+      const modal = document.getElementById('adminModal');
+      modal.classList.toggle('hidden');
+    }
+
+    function handleAdminLogin(e) {
+      e.preventDefault();
+      const alert = document.getElementById('adminLoginAlert');
+      alert.classList.remove('hidden');
+      setTimeout(() => {
+        toggleAdminModal();
+        alert.classList.add('hidden');
+      }, 1500);
+    }
+  </script>
+</body>
+</html>
