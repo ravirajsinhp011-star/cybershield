@@ -456,28 +456,6 @@ async function loadAdminScanLogs() {
   } catch (e) {}
 }
 
-// --- URL SCAN SUBMISSION ---
-async function submitURLScan() {
-  let inputEl = document.getElementById("url-input");
-  let url = inputEl ? inputEl.value.trim() : "";
-  if (!url) {
-    fillSampleUrl();
-    url = document.getElementById("url-input").value.trim();
-  }
-
-  // WAF Active Interception Check
-  const wafCheck = validateInputWithWAF(url, "Threat Scanner (URL Engine)");
-  if (wafCheck.blocked) {
-    triggerWAFDefense(wafCheck);
-    return;
-  }
-
-  // Normalize target URL (ensure bare domains like 'google.com' have http://)
-  let cleanUrl = url;
-  if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
-    cleanUrl = "http://" + cleanUrl;
-  }
-
 // ============================================================================
 // STANDALONE CLIENT-SIDE HEURISTIC INFERENCE ENGINES (Vercel Static Fallbacks)
 // ============================================================================
@@ -2622,8 +2600,8 @@ function logout() {
   switchTab("scanner");
 }
 
-// Initial Run
-window.addEventListener("DOMContentLoaded", () => {
+// Initial Run - Safe execution for both loading and already-loaded states
+function initializeApp() {
   updateRoleUI();
   initCyberRadarCanvas();
   initBgCanvas();
@@ -2652,7 +2630,13 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-});
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeApp);
+} else {
+  initializeApp();
+}
 
 // =========================================================================
 // SECTION 10: REAL-TIME PASSWORD STRENGTH & EXPOSURE ANALYZER (SENTINEL)

@@ -53,7 +53,7 @@
   </script>
 
   <!-- Custom Cyber Theme CSS (Relative Path with Dynamic Static Fallback) -->
-  <link rel="stylesheet" href="./static/css/style.css" id="main-cyber-css" onerror="this.onerror=null;this.href='../static/css/style.css';">
+  <link rel="stylesheet" href="./frontend/static/css/style.css" id="main-cyber-css" onerror="this.onerror=null;this.href='./static/css/style.css';">
   <script>
     (function() {
       var testLink = document.createElement("link");
@@ -1757,7 +1757,7 @@
   </div>
 
   <!-- Application Engine Script (Relative Path with Dynamic Static Fallback) -->
-  <script src="./static/js/app.js" id="main-cyber-js" onerror="this.onerror=null;this.src='../static/js/app.js';"></script>
+  <script src="./frontend/static/js/app.js" id="main-cyber-js" onerror="this.onerror=null;this.src='./static/js/app.js';"></script>
   <script>
     if (!window.CyberShieldLoaded) {
       var fb = document.createElement("script");
