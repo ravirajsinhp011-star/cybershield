@@ -11,6 +11,52 @@ let currentToken = localStorage.getItem("cybershield_token") || null;
 let currentUsername = localStorage.getItem("cybershield_user") || null;
 let currentUserRole = localStorage.getItem("cybershield_role") || null;
 
+// --- SIDEBAR COLLAPSE & MOBILE DRAWER CONTROLS ---
+function toggleSidebarCollapse() {
+  const isCollapsed = document.body.classList.toggle("sidebar-is-collapsed");
+  try {
+    localStorage.setItem("cybershield_sidebar_collapsed", isCollapsed ? "true" : "false");
+  } catch(e) {}
+  
+  const icon = document.getElementById("collapse-icon");
+  const collapseText = document.getElementById("collapse-btn-text");
+  if (icon) {
+    if (isCollapsed) {
+      icon.classList.remove("fa-angles-left");
+      icon.classList.add("fa-angles-right");
+    } else {
+      icon.classList.remove("fa-angles-right");
+      icon.classList.add("fa-angles-left");
+    }
+  }
+  if (collapseText) {
+    collapseText.innerText = isCollapsed ? "Expand Menu" : "Collapse Menu";
+  }
+}
+
+function toggleMobileSidebar(forceState) {
+  const sidebar = document.getElementById("cyber-sidebar");
+  const backdrop = document.getElementById("sidebar-backdrop");
+  if (!sidebar) return;
+  
+  const isOpen = forceState !== undefined ? forceState : !sidebar.classList.contains("mobile-open");
+  if (isOpen) {
+    sidebar.classList.add("mobile-open");
+    if (backdrop) {
+      backdrop.classList.remove("opacity-0", "pointer-events-none");
+      backdrop.classList.add("opacity-100", "pointer-events-auto");
+    }
+    document.body.style.overflow = "hidden";
+  } else {
+    sidebar.classList.remove("mobile-open");
+    if (backdrop) {
+      backdrop.classList.remove("opacity-100", "pointer-events-auto");
+      backdrop.classList.add("opacity-0", "pointer-events-none");
+    }
+    document.body.style.overflow = "";
+  }
+}
+
 // --- TAB SWITCHING & SMOOTH AUTO-SCROLL NAVIGATION ---
 function switchTab(tabName) {
   const allTabs = [
@@ -24,11 +70,11 @@ function switchTab(tabName) {
     const nav = document.getElementById(`nav-${t}`);
     const mobNav = document.getElementById(`mobile-nav-${t}`);
     if (nav) {
-      nav.classList.remove("text-cyber-cyan", "bg-cyber-cyan/10", "border", "border-cyber-cyan/30", "text-cyan-400", "bg-cyan-500/10", "border-cyan-500/30");
+      nav.classList.remove("text-cyber-cyan", "bg-cyber-cyan/10", "border", "border-cyber-cyan/30", "text-cyan-400", "bg-cyan-500/10", "border-cyan-500/30", "active-nav-item");
       nav.classList.add("text-slate-400");
     }
     if (mobNav) {
-      mobNav.classList.remove("text-cyber-cyan", "bg-cyber-cyan/10", "border", "border-cyber-cyan/30", "text-cyan-400", "bg-cyan-500/10", "border-cyan-500/30");
+      mobNav.classList.remove("text-cyber-cyan", "bg-cyber-cyan/10", "border", "border-cyber-cyan/30", "text-cyan-400", "bg-cyan-500/10", "border-cyan-500/30", "active-nav-item");
       mobNav.classList.add("text-slate-400");
     }
   });
@@ -37,14 +83,40 @@ function switchTab(tabName) {
   const activeMobNav = document.getElementById(`mobile-nav-${tabName}`);
   if (activeNav) {
     activeNav.classList.remove("text-slate-400");
-    activeNav.classList.add("text-cyber-cyan", "bg-cyber-cyan/10", "border", "border-cyber-cyan/30");
+    activeNav.classList.add("text-cyber-cyan", "active-nav-item");
   }
   if (activeMobNav) {
     activeMobNav.classList.remove("text-slate-400");
-    activeMobNav.classList.add("text-cyber-cyan", "bg-cyber-cyan/10", "border", "border-cyber-cyan/30");
+    activeMobNav.classList.add("text-cyber-cyan", "active-nav-item");
     try {
       activeMobNav.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
     } catch(e) {}
+  }
+
+  // Update Breadcrumb Indicator
+  const breadcrumbMap = {
+    "scanner": "Threat Scanner",
+    "attack-matrix": "Live Threat Map",
+    "domain-inspector": "Domain Inspector",
+    "assistant": "AI Security Assistant",
+    "quiz": "Cyber Academy",
+    "password-analyzer": "Password Sentinel",
+    "phishing-analyzer": "Link & Phish Radar",
+    "user-vault": "My Vault",
+    "user-stats": "My Badges",
+    "admin-soc": "SOC Telemetry",
+    "admin-users": "User Management",
+    "admin-rules": "WAF Policies",
+    "admin-audit": "Audit Logs"
+  };
+  const breadcrumbEl = document.getElementById("current-page-breadcrumb");
+  if (breadcrumbEl && breadcrumbMap[tabName]) {
+    breadcrumbEl.innerText = breadcrumbMap[tabName];
+  }
+
+  // Close mobile sidebar drawer if open
+  if (window.innerWidth < 1024) {
+    toggleMobileSidebar(false);
   }
 
   // 2. Identify target card/section
@@ -2539,6 +2611,10 @@ function updateRoleUI() {
   const tabAdminRules = document.getElementById("nav-admin-rules");
   const tabAdminAudit = document.getElementById("nav-admin-audit");
 
+  // User & Admin Section wrappers in Sidebar
+  const userSection = document.getElementById("sidebar-user-section");
+  const adminSection = document.getElementById("sidebar-admin-section");
+
   if (currentToken && currentUsername) {
     btnLogin.classList.add("hidden");
     userBadge.classList.remove("hidden");
@@ -2550,7 +2626,10 @@ function updateRoleUI() {
       userRoleTag.className = "px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-950 text-rose-400 border border-rose-700";
       userRoleTag.innerText = "SOC ADMIN";
 
-      // Show Admin tabs
+      // Show Admin tabs & section
+      if (adminSection) adminSection.classList.remove("hidden");
+      if (userSection) userSection.classList.add("hidden");
+
       if (tabSOC) tabSOC.classList.remove("hidden");
       if (tabAdminUsers) tabAdminUsers.classList.remove("hidden");
       if (tabAdminRules) tabAdminRules.classList.remove("hidden");
@@ -2565,7 +2644,10 @@ function updateRoleUI() {
       userRoleTag.className = "px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-700";
       userRoleTag.innerText = "USER";
 
-      // Show User tabs
+      // Show User tabs & section
+      if (userSection) userSection.classList.remove("hidden");
+      if (adminSection) adminSection.classList.add("hidden");
+
       if (tabVault) tabVault.classList.remove("hidden");
       if (tabStats) tabStats.classList.remove("hidden");
 
@@ -2579,6 +2661,9 @@ function updateRoleUI() {
     // Guest View
     btnLogin.classList.remove("hidden");
     userBadge.classList.add("hidden");
+
+    if (userSection) userSection.classList.add("hidden");
+    if (adminSection) adminSection.classList.add("hidden");
 
     if (tabVault) tabVault.classList.add("hidden");
     if (tabStats) tabStats.classList.add("hidden");
@@ -2602,12 +2687,43 @@ function logout() {
 
 // Initial Run - Safe execution for both loading and already-loaded states
 function initializeApp() {
+  // Restore sidebar collapsed preference on desktop
+  try {
+    const savedCollapsed = localStorage.getItem("cybershield_sidebar_collapsed");
+    if (savedCollapsed === "true" && window.innerWidth >= 1024) {
+      document.body.classList.add("sidebar-is-collapsed");
+      const icon = document.getElementById("collapse-icon");
+      const collapseText = document.getElementById("collapse-btn-text");
+      if (icon) {
+        icon.classList.remove("fa-angles-left");
+        icon.classList.add("fa-angles-right");
+      }
+      if (collapseText) {
+        collapseText.innerText = "Expand Menu";
+      }
+    }
+  } catch(e) {}
+
   updateRoleUI();
   initCyberRadarCanvas();
   initBgCanvas();
   initAttackFeed();
   initCloudDatabase();
   loadAdminScanLogs();
+
+  // Keyboard Shortcut Listener for Sidebar (Ctrl+B / Cmd+B and Escape)
+  window.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && (e.key === "b" || e.key === "B")) {
+      e.preventDefault();
+      if (window.innerWidth >= 1024) {
+        toggleSidebarCollapse();
+      } else {
+        toggleMobileSidebar();
+      }
+    } else if (e.key === "Escape") {
+      toggleMobileSidebar(false);
+    }
+  });
 
   // Enter Key Listener for Threat Scanner Target Input
   const urlInput = document.getElementById("url-input");

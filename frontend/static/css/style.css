@@ -425,3 +425,209 @@ html {
   }
 }
 
+/* ==========================================================================
+   CYBERSHIELD VERTICAL SIDEBAR & DYNAMIC LAYOUT ENGINE
+   ========================================================================== */
+
+#cyber-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  background: rgba(6, 9, 19, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(139, 92, 246, 0.22);
+  box-shadow: 10px 0 35px -10px rgba(0, 0, 0, 0.7);
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Thin Custom Scrollbar for Sidebar */
+.cyber-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.cyber-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.cyber-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.25);
+  border-radius: 9999px;
+}
+.cyber-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 242, 254, 0.45);
+}
+
+/* Sidebar Nav Item */
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.75rem;
+  color: #94a3b8;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  white-space: nowrap;
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  user-select: none;
+}
+
+.sidebar-nav-item:hover {
+  color: #ffffff;
+  background: rgba(139, 92, 246, 0.12);
+  border-color: rgba(139, 92, 246, 0.28);
+  transform: translateX(2px);
+}
+
+.sidebar-nav-item:focus-visible {
+  outline: 2px solid var(--neon-cyan);
+  outline-offset: 2px;
+}
+
+.sidebar-nav-item.active-nav-item {
+  color: var(--neon-cyan) !important;
+  background: rgba(0, 242, 254, 0.09) !important;
+  border-color: rgba(0, 242, 254, 0.32) !important;
+  box-shadow: inset 3px 0 0 0 var(--neon-cyan), 0 0 16px rgba(0, 242, 254, 0.15);
+}
+
+.sidebar-nav-item .nav-icon-box {
+  width: 1.75rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+
+.sidebar-nav-item:hover .nav-icon-box {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+.sidebar-nav-item.active-nav-item .nav-icon-box {
+  background: rgba(0, 242, 254, 0.15);
+  border-color: rgba(0, 242, 254, 0.4);
+  color: var(--neon-cyan);
+}
+
+/* Content wrapper dynamic spacing */
+#content-wrapper {
+  transition: padding-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Desktop Sidebar Modes (>= 1024px) */
+@media (min-width: 1024px) {
+  #cyber-sidebar {
+    width: 16rem; /* 256px */
+    transform: translateX(0) !important;
+  }
+
+  #content-wrapper {
+    padding-left: 16rem;
+  }
+
+  /* Collapsed Mode */
+  body.sidebar-is-collapsed #cyber-sidebar {
+    width: 5rem; /* 80px */
+  }
+
+  body.sidebar-is-collapsed #content-wrapper {
+    padding-left: 5rem;
+  }
+
+  body.sidebar-is-collapsed .sidebar-label,
+  body.sidebar-is-collapsed .sidebar-heading,
+  body.sidebar-is-collapsed .sidebar-brand-text,
+  body.sidebar-is-collapsed .sidebar-footer-text,
+  body.sidebar-is-collapsed .sidebar-divider-text {
+    display: none !important;
+  }
+
+  body.sidebar-is-collapsed .sidebar-nav-item {
+    justify-content: center;
+    padding: 0.65rem 0;
+    gap: 0;
+  }
+
+  body.sidebar-is-collapsed .sidebar-nav-item .nav-icon-box {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  body.sidebar-is-collapsed .sidebar-nav-item i {
+    font-size: 1.1rem;
+  }
+
+  /* Tooltip on Hover in Collapsed Mode */
+  body.sidebar-is-collapsed .sidebar-nav-item:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: calc(100% + 14px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(11, 17, 32, 0.96);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 242, 254, 0.4);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-weight: 600;
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.5rem;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 70;
+    box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.8), 0 0 14px rgba(0, 242, 254, 0.3);
+    animation: tooltipFadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+/* Mobile & Tablet Drawer (< 1024px) */
+@media (max-width: 1023px) {
+  #cyber-sidebar {
+    width: 18rem;
+    max-width: 85vw;
+    transform: translateX(-100%);
+  }
+
+  #cyber-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  #content-wrapper {
+    padding-left: 0 !important;
+  }
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+

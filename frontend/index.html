@@ -183,132 +183,214 @@
   <div class="ambient-glow-1"></div>
   <div class="ambient-glow-2"></div>
 
-  <!-- Navigation Header -->
-  <header class="sticky top-0 z-50 w-full glass-panel border-b border-slate-800/80">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-      
-      <!-- Brand Logo -->
-      <div class="flex items-center space-x-3 cursor-pointer group" onclick="switchTab('scanner')">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyber-purple to-cyber-cyan p-0.5 shadow-lg shadow-cyber-purple/20 group-hover:scale-105 transition-transform">
+  <!-- Vertical Left Navigation Sidebar -->
+  <aside id="cyber-sidebar" class="cyber-sidebar" aria-label="Main Navigation">
+    <!-- Brand Logo Section -->
+    <div class="h-16 sm:h-20 px-4 flex items-center justify-between border-b border-slate-800/80 shrink-0">
+      <div class="flex items-center space-x-3 cursor-pointer group overflow-hidden" onclick="switchTab('scanner')" title="AI CyberShield">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyber-purple to-cyber-cyan p-0.5 shadow-lg shadow-cyber-purple/20 group-hover:scale-105 transition-transform shrink-0">
           <div class="w-full h-full bg-cyber-bg rounded-[10px] flex items-center justify-center">
             <i class="fa-solid font-bold fa-shield-halved text-cyber-cyan text-lg"></i>
           </div>
         </div>
-        <div>
-          <span class="text-xl font-extrabold tracking-wider bg-gradient-to-r from-white via-slate-200 to-cyber-cyan bg-clip-text text-transparent">
+        <div class="sidebar-brand-text min-w-0 transition-opacity">
+          <span class="text-base font-extrabold tracking-wider bg-gradient-to-r from-white via-slate-200 to-cyber-cyan bg-clip-text text-transparent block truncate">
             AI CYBERSHIELD
           </span>
-          <span class="block text-[10px] font-mono tracking-widest text-cyber-purple uppercase">Enterprise Defense v2.4</span>
+          <span class="block text-[9px] font-mono tracking-widest text-cyber-purple uppercase truncate">Enterprise SOC v2.4</span>
         </div>
       </div>
+      <!-- Mobile Close Drawer Button (visible only on small screens) -->
+      <button onclick="toggleMobileSidebar(false)" aria-label="Close Navigation Sidebar" class="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+    </div>
 
-      <!-- Center Nav Links -->
-      <nav class="hidden lg:flex items-center space-x-1 font-mono text-xs tracking-wide">
-        <button onclick="switchTab('scanner')" id="nav-scanner" class="px-3 py-2 rounded-lg text-cyber-cyan bg-cyber-cyan/10 border border-cyber-cyan/30 flex items-center gap-2 transition">
-          <i class="fa-solid fa-radar text-xs"></i> Threat Scanner
-        </button>
-        <button onclick="switchTab('attack-matrix')" id="nav-attack-matrix" class="px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition flex items-center gap-2">
-          <i class="fa-solid fa-network-wired text-xs"></i> Live Threat Map
-        </button>
-        <button onclick="switchTab('domain-inspector')" id="nav-domain-inspector" class="px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition flex items-center gap-2">
-          <i class="fa-solid fa-server text-xs"></i> Domain Inspector
-        </button>
-        <button onclick="switchTab('assistant')" id="nav-assistant" class="px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition flex items-center gap-2">
-          <i class="fa-solid fa-robot text-xs"></i> AI Assistant
-        </button>
-        <button onclick="switchTab('quiz')" id="nav-quiz" class="px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition flex items-center gap-2">
-          <i class="fa-solid fa-graduation-cap text-xs"></i> Cyber Academy
-        </button>
-        <button onclick="switchTab('password-analyzer')" id="nav-password-analyzer" class="px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition flex items-center gap-2">
-          <i class="fa-solid fa-key text-xs"></i> Password Sentinel
-        </button>
-        <button onclick="switchTab('phishing-analyzer')" id="nav-phishing-analyzer" class="px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition flex items-center gap-2">
-          <i class="fa-solid fa-magnifying-glass-chart text-xs"></i> Link & Phish Radar
-        </button>
-
-        <!-- Authenticated User Tabs -->
-        <button onclick="switchTab('user-vault')" id="nav-user-vault" class="hidden px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition flex items-center gap-2">
-          <i class="fa-solid fa-vault text-xs text-emerald-400"></i> My Vault
-        </button>
-        <button onclick="switchTab('user-stats')" id="nav-user-stats" class="hidden px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition flex items-center gap-2">
-          <i class="fa-solid fa-award text-xs text-amber-400"></i> Badges
-        </button>
-
-        <!-- Authenticated Admin Tabs -->
-        <button onclick="switchTab('admin-soc')" id="nav-admin-soc" class="hidden px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition flex items-center gap-2">
-          <i class="fa-solid fa-chart-line text-xs text-cyan-400"></i> SOC Telemetry
-        </button>
-        <button onclick="switchTab('admin-users')" id="nav-admin-users" class="hidden px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition flex items-center gap-2">
-          <i class="fa-solid fa-users-gear text-xs text-purple-400"></i> Users
-        </button>
-        <button onclick="switchTab('admin-rules')" id="nav-admin-rules" class="hidden px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition flex items-center gap-2">
-          <i class="fa-solid fa-list-check text-xs text-rose-400"></i> Policies
-        </button>
-        <button onclick="switchTab('admin-audit')" id="nav-admin-audit" class="hidden px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition flex items-center gap-2">
-          <i class="fa-solid fa-clipboard-list text-xs text-slate-400"></i> Audit
-        </button>
-      </nav>
-
-      <!-- Right Action & System Status -->
-      <div class="flex items-center space-x-3" id="auth-container">
-        <!-- Status Indicator Pill -->
-        <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 font-mono text-xs">
-          <span class="relative flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-          </span>
-          <span class="font-medium tracking-tight">SOC ACTIVE DEFENSE</span>
+    <!-- Navigation Items List -->
+    <nav class="cyber-scrollbar overflow-y-auto flex-1 py-4 px-3 space-y-4">
+      
+      <!-- Core Engines Section -->
+      <div class="space-y-1">
+        <div class="sidebar-heading px-2.5 text-[10px] font-mono uppercase tracking-widest text-slate-500 font-semibold mb-1">
+          Core Engines
         </div>
-
-        <!-- Guest State: Admin / Sign In Button -->
-        <button onclick="openAuthModal('login')" id="btn-login" class="px-4 py-2 rounded-xl bg-gradient-to-r from-cyber-purple to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium text-xs tracking-wider transition shadow-lg shadow-cyber-purple/25 flex items-center gap-2 border border-purple-400/30">
-          <i class="fa-solid fa-user-shield"></i>
-          <span>Admin Portal / Sign In</span>
+        <button onclick="switchTab('scanner')" id="nav-scanner" data-tooltip="Threat Scanner" class="sidebar-nav-item active-nav-item">
+          <div class="nav-icon-box">
+            <i class="fa-solid fa-radar text-cyber-cyan text-sm"></i>
+          </div>
+          <span class="sidebar-label truncate">Threat Scanner</span>
         </button>
+        <button onclick="switchTab('attack-matrix')" id="nav-attack-matrix" data-tooltip="Live Threat Map" class="sidebar-nav-item">
+          <div class="nav-icon-box">
+            <i class="fa-solid fa-network-wired text-slate-400 text-sm"></i>
+          </div>
+          <span class="sidebar-label truncate">Live Threat Map</span>
+        </button>
+        <button onclick="switchTab('domain-inspector')" id="nav-domain-inspector" data-tooltip="Domain Inspector" class="sidebar-nav-item">
+          <div class="nav-icon-box">
+            <i class="fa-solid fa-server text-slate-400 text-sm"></i>
+          </div>
+          <span class="sidebar-label truncate">Domain Inspector</span>
+        </button>
+        <button onclick="switchTab('phishing-analyzer')" id="nav-phishing-analyzer" data-tooltip="Link & Phish Radar" class="sidebar-nav-item">
+          <div class="nav-icon-box">
+            <i class="fa-solid fa-magnifying-glass-chart text-slate-400 text-sm"></i>
+          </div>
+          <span class="sidebar-label truncate">Link &amp; Phish Radar</span>
+        </button>
+        <button onclick="switchTab('password-analyzer')" id="nav-password-analyzer" data-tooltip="Password Sentinel" class="sidebar-nav-item">
+          <div class="nav-icon-box">
+            <i class="fa-solid fa-key text-slate-400 text-sm"></i>
+          </div>
+          <span class="sidebar-label truncate">Password Sentinel</span>
+        </button>
+      </div>
 
-        <!-- Authenticated User Profile Badge -->
-        <div id="user-badge" class="hidden items-center space-x-2.5 bg-slate-900/90 border border-slate-700/80 px-3.5 py-1.5 rounded-xl text-xs backdrop-blur-md">
-          <span id="role-pulse-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span id="user-name" class="font-bold text-slate-200">User</span>
-          <span id="user-role-tag" class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-400 border border-cyan-700">USER</span>
-          <button onclick="logout()" class="text-slate-400 hover:text-rose-400 ml-1.5 transition-colors" title="Sign Out">
-            <i class="fa-solid fa-right-from-bracket"></i>
+      <!-- Intelligence & Training Section -->
+      <div class="space-y-1">
+        <div class="sidebar-heading px-2.5 text-[10px] font-mono uppercase tracking-widest text-slate-500 font-semibold mb-1">
+          AI &amp; Academy
+        </div>
+        <button onclick="switchTab('assistant')" id="nav-assistant" data-tooltip="AI Assistant" class="sidebar-nav-item">
+          <div class="nav-icon-box">
+            <i class="fa-solid fa-robot text-purple-400 text-sm"></i>
+          </div>
+          <span class="sidebar-label truncate">AI Assistant</span>
+        </button>
+        <button onclick="switchTab('quiz')" id="nav-quiz" data-tooltip="Cyber Academy" class="sidebar-nav-item">
+          <div class="nav-icon-box">
+            <i class="fa-solid fa-graduation-cap text-amber-400 text-sm"></i>
+          </div>
+          <span class="sidebar-label truncate">Cyber Academy</span>
+        </button>
+      </div>
+
+      <!-- Authenticated User Tabs (Dynamic Role UI) -->
+      <div id="sidebar-user-section" class="hidden space-y-1">
+        <div class="sidebar-heading px-2.5 text-[10px] font-mono uppercase tracking-widest text-emerald-400 font-semibold mb-1">
+          Personal Vault
+        </div>
+        <button onclick="switchTab('user-vault')" id="nav-user-vault" data-tooltip="My Vault" class="sidebar-nav-item">
+          <div class="nav-icon-box">
+            <i class="fa-solid fa-vault text-emerald-400 text-sm"></i>
+          </div>
+          <span class="sidebar-label truncate">My Vault</span>
+        </button>
+        <button onclick="switchTab('user-stats')" id="nav-user-stats" data-tooltip="My Badges" class="sidebar-nav-item">
+          <div class="nav-icon-box">
+            <i class="fa-solid fa-award text-amber-400 text-sm"></i>
+          </div>
+          <span class="sidebar-label truncate">My Badges</span>
+        </button>
+      </div>
+
+      <!-- Authenticated Admin Tabs (Dynamic Role UI) -->
+      <div id="sidebar-admin-section" class="hidden space-y-1">
+        <div class="sidebar-heading px-2.5 text-[10px] font-mono uppercase tracking-widest text-rose-400 font-semibold mb-1">
+          Admin SOC
+        </div>
+        <button onclick="switchTab('admin-soc')" id="nav-admin-soc" data-tooltip="SOC Telemetry" class="sidebar-nav-item">
+          <div class="nav-icon-box">
+            <i class="fa-solid fa-chart-line text-cyan-400 text-sm"></i>
+          </div>
+          <span class="sidebar-label truncate">SOC Telemetry</span>
+        </button>
+        <button onclick="switchTab('admin-users')" id="nav-admin-users" data-tooltip="Users" class="sidebar-nav-item">
+          <div class="nav-icon-box">
+            <i class="fa-solid fa-users-gear text-purple-400 text-sm"></i>
+          </div>
+          <span class="sidebar-label truncate">Users</span>
+        </button>
+        <button onclick="switchTab('admin-rules')" id="nav-admin-rules" data-tooltip="Policies" class="sidebar-nav-item">
+          <div class="nav-icon-box">
+            <i class="fa-solid fa-list-check text-rose-400 text-sm"></i>
+          </div>
+          <span class="sidebar-label truncate">Policies</span>
+        </button>
+        <button onclick="switchTab('admin-audit')" id="nav-admin-audit" data-tooltip="Audit Logs" class="sidebar-nav-item">
+          <div class="nav-icon-box">
+            <i class="fa-solid fa-clipboard-list text-slate-400 text-sm"></i>
+          </div>
+          <span class="sidebar-label truncate">Audit Logs</span>
+        </button>
+      </div>
+
+    </nav>
+
+    <!-- Sidebar Footer / Desktop Collapse Toggle -->
+    <div class="shrink-0 border-t border-slate-800/80 p-3 bg-slate-950/40">
+      <button onclick="toggleSidebarCollapse()" aria-label="Toggle Navigation Sidebar" class="w-full flex items-center justify-between p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition group focus:outline-none focus:ring-1 focus:ring-cyber-cyan">
+        <div class="flex items-center gap-2.5 overflow-hidden">
+          <div class="w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0 group-hover:border-slate-700">
+            <i id="collapse-icon" class="fa-solid fa-angles-left text-xs text-cyber-cyan transition-transform duration-300"></i>
+          </div>
+          <span id="collapse-btn-text" class="sidebar-footer-text text-xs font-mono font-medium truncate">Collapse Menu</span>
+        </div>
+        <span class="sidebar-footer-text text-[10px] font-mono text-slate-500 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800 shrink-0">Ctrl+B</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Mobile Backdrop Overlay -->
+  <div id="sidebar-backdrop" onclick="toggleMobileSidebar(false)" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300 opacity-0 pointer-events-none lg:hidden"></div>
+
+  <!-- Content Wrapper -->
+  <div id="content-wrapper">
+    <!-- Top Header Bar (Fixed / Sticky at Top) -->
+    <header class="sticky top-0 z-30 w-full glass-panel border-b border-slate-800/80">
+      <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
+        
+        <!-- Left: Mobile Drawer Trigger & Console Breadcrumb -->
+        <div class="flex items-center gap-3 min-w-0">
+          <!-- Mobile Hamburger Button -->
+          <button onclick="toggleMobileSidebar()" aria-label="Open Navigation Sidebar" class="lg:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-slate-700/60 transition focus:outline-none focus:ring-2 focus:ring-cyber-cyan shrink-0">
+            <i class="fa-solid fa-bars text-base"></i>
           </button>
+          
+          <!-- Breadcrumb Indicator -->
+          <div class="flex items-center space-x-2 text-xs font-mono text-slate-400 min-w-0">
+            <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-slate-900/80 border border-slate-800 text-cyber-cyan shrink-0">
+              <i class="fa-solid fa-terminal text-[10px]"></i> CONSOLE
+            </span>
+            <span class="text-slate-600 shrink-0">/</span>
+            <span id="current-page-breadcrumb" class="text-white font-medium tracking-wide truncate">Threat Scanner</span>
+          </div>
         </div>
+
+        <!-- Right: SOC Active Defense & Authentication Controls (Never Overlaps) -->
+        <div class="flex items-center gap-3 shrink-0" id="auth-container">
+          <!-- Status Indicator Pill -->
+          <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 font-mono text-xs shadow-sm">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span class="font-medium tracking-tight whitespace-nowrap">SOC ACTIVE DEFENSE</span>
+          </div>
+
+          <!-- Guest State: Admin / Sign In Button -->
+          <button onclick="openAuthModal('login')" id="btn-login" class="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-cyber-purple to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium text-xs tracking-wider transition shadow-lg shadow-cyber-purple/25 flex items-center gap-2 border border-purple-400/30 shrink-0">
+            <i class="fa-solid fa-user-shield"></i>
+            <span class="hidden sm:inline">Admin Portal / Sign In</span>
+            <span class="sm:hidden">Sign In</span>
+          </button>
+
+          <!-- Authenticated User Profile Badge -->
+          <div id="user-badge" class="hidden items-center space-x-2.5 bg-slate-900/90 border border-slate-700/80 px-3.5 py-1.5 rounded-xl text-xs backdrop-blur-md shrink-0">
+            <span id="role-pulse-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="user-name" class="font-bold text-slate-200">User</span>
+            <span id="user-role-tag" class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-400 border border-cyan-700">USER</span>
+            <button onclick="logout()" class="text-slate-400 hover:text-rose-400 ml-1.5 transition-colors" title="Sign Out">
+              <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+          </div>
+        </div>
+
       </div>
+    </header>
 
-  </header>
-
-  <!-- Mobile Horizontal Quick-Nav Bar (Visible on Mobile & Tablet Screens < lg) -->
-  <div class="lg:hidden sticky top-20 z-40 w-full glass-panel border-b border-slate-800/80 px-2 py-2 overflow-x-auto flex items-center space-x-1.5 font-mono text-xs">
-    <button onclick="switchTab('scanner')" id="mobile-nav-scanner" class="px-2.5 py-1.5 rounded-lg text-cyber-cyan bg-cyber-cyan/10 border border-cyber-cyan/30 shrink-0 flex items-center gap-1.5 transition">
-      <i class="fa-solid fa-radar text-[10px]"></i> Threat Scanner
-    </button>
-    <button onclick="switchTab('attack-matrix')" id="mobile-nav-attack-matrix" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white shrink-0 flex items-center gap-1.5 transition">
-      <i class="fa-solid fa-network-wired text-[10px]"></i> Live Map
-    </button>
-    <button onclick="switchTab('domain-inspector')" id="mobile-nav-domain-inspector" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white shrink-0 flex items-center gap-1.5 transition">
-      <i class="fa-solid fa-server text-[10px]"></i> Domain Inspector
-    </button>
-    <button onclick="switchTab('assistant')" id="mobile-nav-assistant" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white shrink-0 flex items-center gap-1.5 transition">
-      <i class="fa-solid fa-robot text-[10px]"></i> AI Assistant
-    </button>
-    <button onclick="switchTab('quiz')" id="mobile-nav-quiz" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white shrink-0 flex items-center gap-1.5 transition">
-      <i class="fa-solid fa-graduation-cap text-[10px]"></i> Academy
-    </button>
-    <button onclick="switchTab('password-analyzer')" id="mobile-nav-password-analyzer" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white shrink-0 flex items-center gap-1.5 transition">
-      <i class="fa-solid fa-key text-[10px]"></i> Password Sentinel
-    </button>
-    <button onclick="switchTab('phishing-analyzer')" id="mobile-nav-phishing-analyzer" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white shrink-0 flex items-center gap-1.5 transition">
-      <i class="fa-solid fa-magnifying-glass-chart text-[10px]"></i> Phish Radar
-    </button>
-    <button onclick="switchTab('admin-soc')" id="mobile-nav-admin-soc" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white shrink-0 flex items-center gap-1.5 transition">
-      <i class="fa-solid fa-chart-line text-[10px] text-cyan-400"></i> SOC Logs
-    </button>
-  </div>
-
-  <!-- MAIN DASHBOARD CONTAINER -->
-  <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20 space-y-16">
+    <!-- MAIN DASHBOARD CONTAINER -->
+    <main class="relative z-10 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-20 space-y-16">
 
     <!-- Hero Header & Banner -->
     <section class="text-center space-y-6 pt-2">
@@ -1624,8 +1706,8 @@
   </main>
 
   <!-- Footer -->
-  <footer class="glass-panel border-t border-slate-800/80 py-10 relative z-10">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+  <footer class="glass-panel border-t border-slate-800/80 py-10 relative z-10 mt-auto">
+    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="flex items-center space-x-3">
         <div class="w-8 h-8 rounded-lg bg-cyber-purple flex items-center justify-center text-white text-xs font-bold">
           <i class="fa-solid fa-shield-halved"></i>
@@ -1640,6 +1722,7 @@
       </div>
     </div>
   </footer>
+</div> <!-- End #content-wrapper -->
 
   <!-- Admin / Auth Modal (Sign In / Register) -->
   <div id="auth-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
