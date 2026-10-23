@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI CyberShield — Enterprise SOC Technical Defense Presentation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Inter:wght@300;400;600;700;800;900&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #05070f;
+      color: #f8fafc;
+      overflow-x: hidden;
+    }
+    .font-mono {
+      font-family: 'JetBrains+Mono', monospace;
+    }
+    .glass-panel {
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+    .text-glow-cyan {
+      text-shadow: 0 0 15px rgba(6, 182, 212, 0.6);
+    }
+    .text-glow-purple {
+      text-shadow: 0 0 15px rgba(139, 92, 246, 0.6);
+    }
+    .slide-card {
+      display: none;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .slide-card.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .slide-card {
+        display: block !important;
+        opacity: 1 !important;
+        page-break-after: always;
+        border: 1px solid #ccc !important;
+        background: white !important;
+        color: black !important;
+        margin-bottom: 2rem;
+        box-shadow: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-4 sm:p-6 lg:p-8">
+
+  <!-- Presentation Header & Toolbar -->
+  <header class="no-print max-w-6xl mx-auto w-full flex items-center justify-between py-3 border-b border-slate-800">
+    <div class="flex items-center space-x-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-slate-950 font-bold shadow-lg shadow-cyan-500/20">
+        <i class="fa-solid fa-shield-halved text-sm"></i>
+      </div>
+      <div>
+        <h1 class="text-sm font-bold tracking-wider text-white font-mono">AI CYBERSHIELD</h1>
+        <p class="text-[10px] font-mono text-cyan-400">SOC DEFENSE PRESENTATION DECK</p>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="flex items-center space-x-3 text-xs font-mono">
+      <span class="text-slate-400 hidden sm:inline" id="slideIndicator">Slide 1 of 10</span>
+      <button onclick="prevSlide()" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:border-cyan-400 text-slate-300 transition flex items-center gap-1.5">
+        <i class="fa-solid fa-arrow-left"></i> Prev
+      </button>
+      <button onclick="nextSlide()" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:opacity-90 text-slate-950 font-bold transition flex items-center gap-1.5">
+        Next <i class="fa-solid fa-arrow-right"></i>
+      </button>
+      <button onclick="window.print()" title="Print / Save as PDF" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition flex items-center gap-1.5">
+        <i class="fa-solid fa-print"></i> PDF
+      </button>
+      <a href="index.html" class="px-3 py-1.5 rounded-lg bg-purple-950/60 border border-purple-500/40 text-purple-300 hover:text-white transition flex items-center gap-1.5">
+        <i class="fa-solid fa-desktop"></i> Live App
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Slides Container -->
+  <main class="max-w-5xl mx-auto w-full my-6 flex-1 flex flex-col justify-center">
+
+    <!-- SLIDE 1: Title Slide -->
+    <div class="slide-card active glass-panel rounded-3xl p-8 sm:p-12 border border-slate-800 relative overflow-hidden" id="slide-1">
+      <div class="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="space-y-6 text-center sm:text-left">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-400 text-xs font-mono">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+          <span>ENTERPRISE SOC INCIDENT RESPONSE DOSSIER</span>
+        </div>
+        <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+          AI CYBERSHIELD
+        </h2>
+        <p class="text-base sm:text-xl text-purple-400 font-medium">
+          Commercial-Grade Threat Hunting, Script Deobfuscator &amp; MITRE ATT&amp;CK Defense Matrix
+        </p>
+        <p class="text-sm text-slate-300 max-w-2xl leading-relaxed">
+          An authentic, end-to-end cybersecurity intelligence platform designed to eliminate fake AI templates and provide real-world Tier-1/Tier-2 SOC analytical capabilities.
+        </p>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 text-xs font-mono">
+          <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+            <span class="text-slate-500 block">PROJECT LEAD</span>
+            <span class="text-white font-bold">Raviraj Parmar</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+            <span class="text-slate-500 block">STANDARDS COMPLIANCE</span>
+            <span class="text-cyan-400 font-bold">RFC 8484 DoH, STIX 2.1, MITRE v14</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+            <span class="text-slate-500 block">DEPLOYMENT STATUS</span>
+            <span class="text-emerald-400 font-bold">● Live Production Verified</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Problem Statement & Motivation -->
+    <div class="slide-card glass-panel rounded-3xl p-8 sm:p-12 border border-slate-800 space-y-6" id="slide-2">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div>
+          <span class="text-xs font-mono text-cyan-400 font-bold">SECTION 01</span>
+          <h3 class="text-2xl font-bold text-white">Problem Statement &amp; Motivation</h3>
+        </div>
+        <i class="fa-solid fa-triangle-exclamation text-2xl text-amber-400"></i>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+        <div class="p-5 rounded-2xl bg-rose-950/20 border border-rose-900/40 space-y-3">
+          <h4 class="font-bold text-rose-400 flex items-center gap-2">
+            <i class="fa-solid fa-skull-crossbones"></i> The Attack Landscape Challenge
+          </h4>
+          <ul class="space-y-2 text-xs text-slate-300 leading-relaxed list-disc list-inside">
+            <li>Adversaries bypass traditional antivirus using multi-layer encodings (Base64, Hex shellcodes, UTF-16LE).</li>
+            <li>Lookalike typosquatted domains evade basic blocklists via DNS tunneling and fast-flux networks.</li>
+            <li>Social engineering and Quishing (Optical QR Phishing) trick perimeter defenses by moving to the physical layer.</li>
+          </ul>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-cyan-950/20 border border-cyan-900/40 space-y-3">
+          <h4 class="font-bold text-cyan-400 flex items-center gap-2">
+            <i class="fa-solid fa-shield-halved"></i> The AI CyberShield Solution
+          </h4>
+          <ul class="space-y-2 text-xs text-slate-300 leading-relaxed list-disc list-inside">
+            <li><b>Zero Mockups:</b> Employs genuine heuristic formulas (Shannon 8-Bit Entropy, Levenshtein distance).</li>
+            <li><b>Forensic Lab:</b> Multi-layer deobfuscation sandbox with automated defanging and IOC extraction.</li>
+            <li><b>Real DoH Lookups:</b> Cloudflare RFC 8484 DNS queries, SPF/DMARC email validation, and security headers audit.</li>
+            <li><b>Zero-Exposure Privacy:</b> Credential entropy calculates 100% client-side without transmitting plaintexts.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: System Architecture Blueprint -->
+    <div class="slide-card glass-panel rounded-3xl p-8 sm:p-12 border border-slate-800 space-y-6" id="slide-3">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div>
+          <span class="text-xs font-mono text-cyan-400 font-bold">SECTION 02</span>
+          <h3 class="text-2xl font-bold text-white">System Architecture &amp; Pipeline</h3>
+        </div>
+        <i class="fa-solid fa-network-wired text-2xl text-cyan-400"></i>
+      </div>
+
+      <div class="space-y-4">
+        <div class="rounded-2xl border border-slate-800 overflow-hidden bg-slate-950 p-2">
+          <img src="static/img/cybershield_architecture.png" alt="Architecture Diagram" class="w-full h-auto rounded-xl shadow-lg">
+        </div>
+        <p class="text-xs font-mono text-slate-400 text-center">
+          Three-Tier Pipeline: Multi-Vector Ingestion → Boundary WAF &amp; Machine Learning → Forensic Attribution &amp; MITRE Matrix
+        </p>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Standout Feature - Payload Dissector -->
+    <div class="slide-card glass-panel rounded-3xl p-8 sm:p-12 border border-slate-800 space-y-6" id="slide-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div>
+          <span class="text-xs font-mono text-cyan-400 font-bold">SECTION 03</span>
+          <h3 class="text-2xl font-bold text-white">SOC Payload Dissector &amp; Script Deobfuscator</h3>
+        </div>
+        <i class="fa-solid fa-code text-2xl text-cyan-400"></i>
+      </div>
+
+      <div class="space-y-4 text-xs font-mono">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-cyan-400 font-bold block mb-1">MULTI-LAYER DECODING</span>
+            <p class="text-slate-400 text-[11px]">Unpacks Base64, Hexadecimal byte arrays (\x41\x42...), and PowerShell UTF-16LE (-enc) commands.</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-amber-400 font-bold block mb-1">AUTOMATED DEFANGING</span>
+            <p class="text-slate-400 text-[11px]">Converts <code>http://</code> to <code>hxxp://</code> and masks IP dots to protect the operator.</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-rose-400 font-bold block mb-1">IOC EXTRACTION</span>
+            <p class="text-slate-400 text-[11px]">Recursively extracts C2 IPs, stager filenames, and spawned binaries (powershell.exe, cmd.exe).</p>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+          <span class="text-slate-500 font-bold">SAMPLE TEST WORKFLOW:</span>
+          <p class="text-slate-300">1. Click <b>"PowerShell Stager"</b> preset button in Forensic Lab.</p>
+          <p class="text-slate-300">2. Hit <b>"Execute Forensic Deobfuscation"</b>.</p>
+          <p class="text-emerald-400">3. System instantly reveals the hidden payload, flags <b>T1059.001 (PowerShell Stager)</b> with <b>CRITICAL</b> severity.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: Threat Intel IOC Extractor & CVE Radar -->
+    <div class="slide-card glass-panel rounded-3xl p-8 sm:p-12 border border-slate-800 space-y-6" id="slide-5">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div>
+          <span class="text-xs font-mono text-purple-400 font-bold">SECTION 04</span>
+          <h3 class="text-2xl font-bold text-white">Threat Intel IOC Extractor &amp; CVE Radar</h3>
+        </div>
+        <i class="fa-solid fa-fingerprint text-2xl text-purple-400"></i>
+      </div>
+
+      <div class="space-y-4 text-xs font-mono">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
+            <span class="text-cyan-400 font-bold block">IP Categorization</span>
+            <span class="text-slate-400 text-[10px]">Private RFC1918 vs Public WAN</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
+            <span class="text-purple-400 font-bold block">Hashes Radar</span>
+            <span class="text-slate-400 text-[10px]">MD5, SHA1 &amp; SHA256</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
+            <span class="text-amber-400 font-bold block">Defanged Domains</span>
+            <span class="text-slate-400 text-[10px]">FQDN C2 Infrastructure</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
+            <span class="text-rose-400 font-bold block">CVE Vulnerabilities</span>
+            <span class="text-slate-400 text-[10px]">Direct NIST NVD Links</span>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+          <span class="text-slate-400 font-bold uppercase">1-Click Enterprise SIEM Export:</span>
+          <p class="text-slate-300">
+            Export extracted threat indicators directly to <b>STIX 2.1 JSON Bundle</b> (OASIS Open Standard) or <b>CSV format</b> for seamless ingestion into enterprise SIEMs like Splunk, Microsoft Sentinel, or IBM QRadar.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: MITRE ATT&CK Enterprise Matrix -->
+    <div class="slide-card glass-panel rounded-3xl p-8 sm:p-12 border border-slate-800 space-y-6" id="slide-6">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div>
+          <span class="text-xs font-mono text-amber-400 font-bold">SECTION 05</span>
+          <h3 class="text-2xl font-bold text-white">MITRE ATT&amp;CK® Enterprise Matrix (v14.1)</h3>
+        </div>
+        <i class="fa-solid fa-chess text-2xl text-amber-400"></i>
+      </div>
+
+      <div class="space-y-4 text-xs font-mono">
+        <p class="text-slate-300 leading-relaxed">
+          Full alignment with MITRE's standardized adversarial behavior taxonomy across 7 core phases:
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-amber-400 font-bold">TA0043 Reconnaissance</span>
+            <p class="text-slate-400 text-[11px] mt-1">Port Scanning &amp; Banner Grabbing → Defended via Rate Limiting &amp; Header Obfuscation</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-amber-400 font-bold">TA0001 Initial Access</span>
+            <p class="text-slate-400 text-[11px] mt-1">Spearphishing Links &amp; Public Exploits → Defended via Heuristic Scanner</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-amber-400 font-bold">TA0002 Execution</span>
+            <p class="text-slate-400 text-[11px] mt-1">PowerShell Stagers &amp; Command Shells → Neutralized via Forensic Sandbox</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-amber-400 font-bold">TA0005 Defense Evasion</span>
+            <p class="text-slate-400 text-[11px] mt-1">Obfuscated Payloads → Decoded via Client-Side Deobfuscator Engine</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: Live Domain Forensics & DoH -->
+    <div class="slide-card glass-panel rounded-3xl p-8 sm:p-12 border border-slate-800 space-y-6" id="slide-7">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div>
+          <span class="text-xs font-mono text-cyan-400 font-bold">SECTION 06</span>
+          <h3 class="text-2xl font-bold text-white">Live Domain &amp; Security Headers Inspector</h3>
+        </div>
+        <i class="fa-solid fa-server text-2xl text-cyan-400"></i>
+      </div>
+
+      <div class="space-y-4 text-xs font-mono">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-cyan-400 font-bold block mb-1">RFC 8484 DoH</span>
+            <p class="text-slate-400 text-[11px]">Encrypted Cloudflare DNS-over-HTTPS queries bypass local cache poisoning.</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-purple-400 font-bold block mb-1">SPF &amp; DMARC AUDIT</span>
+            <p class="text-slate-400 text-[11px]">Validates cryptographic email anti-spoofing policies in real time.</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-emerald-400 font-bold block mb-1">HTTP HEADERS MATRIX</span>
+            <p class="text-slate-400 text-[11px]">Evaluates HSTS, CSP, and X-Frame-Options with an objective Grade A+ to F.</p>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300">
+          <i class="fa-solid fa-check text-emerald-400 mr-2"></i>
+          Test Targets Built In: Test hardened domains like <code>google.com</code> (Grade A+) vs deceptive phishing domains like <code>paypa1-threat.xyz</code> (Grade F).
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: Threat Scanner & Optical Quishing -->
+    <div class="slide-card glass-panel rounded-3xl p-8 sm:p-12 border border-slate-800 space-y-6" id="slide-8">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div>
+          <span class="text-xs font-mono text-cyan-400 font-bold">SECTION 07</span>
+          <h3 class="text-2xl font-bold text-white">Multi-Vector Threat Scanner &amp; Quishing</h3>
+        </div>
+        <i class="fa-solid fa-microchip text-2xl text-cyan-400"></i>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono">
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+          <i class="fa-solid fa-globe text-cyan-400 text-lg"></i>
+          <h4 class="font-bold text-white">URL Domain Heuristics</h4>
+          <p class="text-slate-400 text-[11px]">Computes Shannon domain randomness and Levenshtein distance to detect typosquatting spoofs.</p>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+          <i class="fa-solid fa-envelope-open-text text-purple-400 text-lg"></i>
+          <h4 class="font-bold text-white">NLP Phishing Engine</h4>
+          <p class="text-slate-400 text-[11px]">Scikit-Learn TF-IDF vectorization matches urgency triggers (account suspended, wire transfer).</p>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+          <i class="fa-solid fa-qrcode text-emerald-400 text-lg"></i>
+          <h4 class="font-bold text-white">Optical Quishing (QR)</h4>
+          <p class="text-slate-400 text-[11px]">Decodes uploaded QR images or camera feed, inspecting hidden redirects before opening.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: Oral Defense & Teacher Demo Script -->
+    <div class="slide-card glass-panel rounded-3xl p-8 sm:p-12 border border-slate-800 space-y-6" id="slide-9">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div>
+          <span class="text-xs font-mono text-cyan-400 font-bold">SECTION 08</span>
+          <h3 class="text-2xl font-bold text-white">Oral Defense Guide (How to Explain to Teachers)</h3>
+        </div>
+        <i class="fa-solid fa-chalkboard-user text-2xl text-cyan-400"></i>
+      </div>
+
+      <div class="space-y-3 text-xs font-mono">
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+          <span class="text-cyan-400 font-bold">1. HOMEPAGE &amp; POSTURE BAR:</span>
+          <p class="text-slate-300 mt-1">Show the left collapsible sidebar (<code>Ctrl+B</code>) and live UTC Zulu Clock. Explain that this is a Tier-1 SOC environment.</p>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+          <span class="text-purple-400 font-bold">2. THREAT SCANNER DEMO:</span>
+          <p class="text-slate-300 mt-1">Click "Load Threat Sample" → run deep inspection. Point out how the SVG Circular Gauge computes 88% Risk using Shannon entropy.</p>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+          <span class="text-amber-400 font-bold">3. FORENSIC LAB (DEOBFUSCATOR):</span>
+          <p class="text-slate-300 mt-1">Select "PowerShell Stager" in Payload Dissector → hit Deobfuscate. Show the defanged <code>hxxp://</code> output and MITRE T1059.001 attribution.</p>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+          <span class="text-emerald-400 font-bold">4. THREAT INTEL &amp; STIX 2.1 EXPORT:</span>
+          <p class="text-slate-300 mt-1">Load sample CISA Advisory → extract IOCs → click "Export STIX 2.1" to download standard threat intelligence.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 10: Conclusion & Live Links -->
+    <div class="slide-card glass-panel rounded-3xl p-8 sm:p-12 border border-slate-800 space-y-6 text-center sm:text-left" id="slide-10">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div>
+          <span class="text-xs font-mono text-emerald-400 font-bold">SECTION 09</span>
+          <h3 class="text-2xl font-bold text-white">Project Conclusion &amp; Production Verification</h3>
+        </div>
+        <i class="fa-solid fa-circle-check text-2xl text-emerald-400"></i>
+      </div>
+
+      <div class="space-y-4 text-xs font-mono">
+        <p class="text-slate-300 leading-relaxed">
+          AI CyberShield proves that modern web cybersecurity platforms can deliver enterprise-grade threat telemetry, zero-trust cryptographic privacy, and authentic reverse-engineering forensics without bloated dependencies.
+        </p>
+
+        <div class="p-5 rounded-2xl bg-cyan-950/30 border border-cyan-500/40 space-y-2">
+          <span class="text-cyan-400 font-bold text-sm block">LIVE PRODUCTION DEPLOYMENT:</span>
+          <a href="https://cybershield-cyber-shield-raviraj-parmar.vercel.app/" target="_blank" class="text-white text-sm font-bold underline hover:text-cyan-300 break-all">
+            https://cybershield-cyber-shield-raviraj-parmar.vercel.app/
+          </a>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-800 text-slate-400">
+          <span>Author &amp; Lead: <b>Raviraj Parmar</b></span>
+          <span>Powered by Heuristics, ML &amp; Google Gemini</span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Presentation Footer -->
+  <footer class="no-print max-w-6xl mx-auto w-full flex items-center justify-between py-3 border-t border-slate-800 text-[11px] font-mono text-slate-500">
+    <div class="flex items-center space-x-2">
+      <span>Use Keyboard:</span>
+      <kbd class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400">←</kbd>
+      <kbd class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400">→</kbd>
+      <span>to navigate slides</span>
+    </div>
+    <div>AI CyberShield © 2026  |  Academic &amp; Enterprise Evaluation</div>
+  </footer>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 10;
+
+    function showSlide(n) {
+      if (n < 1) n = 1;
+      if (n > totalSlides) n = totalSlides;
+      currentSlide = n;
+
+      for (let i = 1; i <= totalSlides; i++) {
+        const slide = document.getElementById(`slide-${i}`);
+        if (slide) {
+          if (i === currentSlide) {
+            slide.classList.add("active");
+          } else {
+            slide.classList.remove("active");
+          }
+        }
+      }
+
+      const indicator = document.getElementById("slideIndicator");
+      if (indicator) {
+        indicator.innerText = `Slide ${currentSlide} of ${totalSlides}`;
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        showSlide(currentSlide + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        showSlide(currentSlide - 1);
+      }
+    }
+
+    // Keyboard listener (ArrowLeft, ArrowRight, Space)
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") {
+        nextSlide();
+      } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+        prevSlide();
+      }
+    });
+  </script>
+</body>
+</html>
